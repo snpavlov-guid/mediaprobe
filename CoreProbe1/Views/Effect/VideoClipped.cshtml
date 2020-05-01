@@ -1,0 +1,61 @@
+﻿
+@{
+    ViewData["Title"] = "Video Clipping";
+    Layout = "_MasterLayout";
+}
+
+@section head {
+    <link rel="stylesheet" href="~/css/effect/video-clipped.css" />
+}
+
+<div class="effect">
+
+    <video autoplay muted loop crossorigin="anonymous"
+           src="~/img/pictures/y2mate.com - ФК Зенит _ FC Zenit_Z95FaXRhKik_1080p.mp4">
+    </video>
+
+    <div class="text-box">
+        <img class="logo" src="~/img/FC_Zenit_1_star_2015_logo.svg" />
+        <span class="name">FC Zenit</span>
+        <span class="city">Saint Petersburg</span>
+    </div>
+
+    <div class="audio-box">
+        <div>
+            <button id="play" class="off"></button>
+            <audio id="player" loop src="~/media/y2mate.com - Ленинград - В Зените_fCPNqZu16uY.mp3"></audio>
+        </div>
+    </div>
+
+
+</div>
+
+<script type="text/javascript">
+
+    function onReady() {
+
+        var btn = document.getElementById("play");
+        var player = document.getElementById("player");
+
+        var togglePlay = function (e) {
+            player.paused ? player.play() : player.pause();
+
+            btn.classList.remove("off");
+            btn.classList.remove("on");
+
+            player.paused ? btn.classList.add("off") : btn.classList.add("on");
+
+            document.activeElement.blur();
+        }
+
+        btn.addEventListener("click", togglePlay)
+
+        document.addEventListener("keyup", togglePlay)
+
+    }
+
+    document.addEventListener("DOMContentLoaded", onReady);
+
+
+</script>
+

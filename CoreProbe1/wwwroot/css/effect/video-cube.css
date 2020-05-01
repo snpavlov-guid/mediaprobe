@@ -1,0 +1,140 @@
+﻿
+body {
+    margin: 0;
+    padding: 0;
+}
+
+section.main {
+    box-sizing: border-box;
+}
+
+div.effect {
+    position: relative;
+    width:100%;
+    height: 100vh;
+    background-color: aliceblue;
+}
+
+div.effect > video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(5px);
+}
+
+div.effect .box {
+    --cube-side: 400px;
+    --cube-oz: calc(var(--cube-side) / 2);
+
+    position:absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--cube-side);
+    height: var(--cube-side);
+    transform: translate(-50%, -50%);
+    transform-style:preserve-3d;
+    animation: cube-move 15s linear infinite;
+}
+
+div.effect .box:hover {
+    animation-play-state:paused;
+}
+
+@keyframes cube-move {
+    0% {
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+    15% {
+        transform: translate(-60%, -50%) scale(1.1);
+    }
+    40% {
+        transform: translate(-60%, -60%) scale(1);
+    }
+    70% {
+        transform: translate(-40%, -40%) scale(0.95);
+    }
+    85% {
+        transform: translate(-40%, -50%) scale(1);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1.05);
+    }
+}
+
+div.effect .box div {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    /*transform: rotateX(-20deg) rotateY(25deg) translate3d(-75px, -50px, 150px);*/
+    transform: rotateX(-20deg) rotateY(25deg);
+}
+
+
+div.effect .box div span {
+    display:block;
+    position:absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(0,0,0,.1);
+    background: #ccc;
+}
+
+div.effect .box div span video {
+    position:absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit:cover;
+}
+
+
+div.effect .box div span:nth-child(1) {
+    transform: rotateX(0deg) translate3d(0,0, var(--cube-oz));
+}
+
+div.effect .box div span:nth-child(2) {
+    transform: rotateY(90deg) translate3d(0,0, calc(var(--cube-oz) * -1));
+}
+
+div.effect .box div span:nth-child(2) video {
+transform: rotateY(180deg);
+}
+
+div.effect .box div span:nth-child(3) {
+    transform: rotateX(90deg) translate3d(0,0, var(--cube-oz));
+}
+
+@media (max-width: 1200px) {
+    div.effect .box {
+        --cube-side: 350px;
+    }
+}
+
+@media (max-width: 992px) {
+    div.effect .box {
+        --cube-side: 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    div.effect .box {
+        --cube-side: 200px;
+    }
+}
+
+@media (max-width: 576px) {
+    div.effect .box {
+        --cube-side: 150px;
+    }
+}
+
+

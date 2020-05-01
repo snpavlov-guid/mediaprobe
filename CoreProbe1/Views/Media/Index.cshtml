@@ -1,0 +1,84 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<link rel="stylesheet" href="~/css/media/media.css" />
+
+@section Scripts {
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="~/js/utils/util-dom.js"></script>
+    <script src="~/js/utils/util-image.js"></script>
+    <script src="~/js/media/camera.js"></script>
+}
+
+<section id="camera-party">
+
+    <div id="player" class="video-player">
+        <canvas id="cupture"></canvas>
+        <video id="video" autoplay></video>
+        <canvas id="overlay"></canvas>
+
+        <div class="controls">
+            <div class="options">
+                <div class="video-options">
+                    <select name="" id="" class="custom-select">
+                        <option value="">Select camera</option>
+                    </select>
+                </div>
+                <div class="video-ratio">
+                    <select name="" id="" class="custom-select">
+                        <option value="">Select ratio</option>
+                    </select>
+                </div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-danger play" title="Play"><i data-feather="play-circle"></i></button>
+                <button class="btn btn-info pause d-none" title="Pause"><i data-feather="pause"></i></button>
+                <button class="btn btn-outline-success d-none" title="ScreenShot"><i data-feather="image"></i></button>
+                <button class="btn btn-outline-warning d-none" title="Detect"><i data-feather="activity"></i></button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="video-detect d-none">
+        <canvas id="source-canvas"></canvas>
+    </div>
+
+    <div class="video-screenshot">
+        <ul class="screenshot-list"></ul>
+    </div>
+
+</section>
+
+<section id="templates">
+
+    <template id="screenshot-item">
+        <img id="screenshot" />
+        <div class="screenshot-ctrl">
+            <button class="screenshot-download" title="Download"></button>
+            <button class="screenshot-remove" title="Remove"></button>
+        </div>
+        <div class="screenshot-info">
+        </div>
+    </template>
+
+</section>
+
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+        feather.replace();
+
+        var cameraParty = new app.media.CameraParty(document.getElementById("camera-party"),
+            {
+                detectorWorkerScriptUrl: "@Url.Content("~/js/media/detector.js")",
+                debugLog : true
+            }); 
+        
+    });
+
+</script>
