@@ -1,0 +1,57 @@
+﻿
+@{
+    Layout = "_MasterLayout";
+}
+
+@section head {
+
+    <link rel="stylesheet" href="~/css/menu/top-menu.css" />
+
+    @RenderSection("head", required: false)
+}
+
+    <header>
+        <div class="top-nav">
+            <a class="back-link" title="Home" href="@Url.Action("Start", "Home", new { id = "" })"></a>
+            <div class="view-menu">
+                @RenderSection("viewmenu", required: false)
+            </div>
+        </div>
+    </header>
+
+    <section class="main">
+        @RenderBody()
+    </section>
+      
+    <footer>
+    </footer>
+
+@section scripts {
+
+    @RenderSection("scripts", required: false)
+}
+
+
+<script type="text/javascript">
+
+    function onReady() {
+
+        var main = document.querySelector("section.main");
+        var topnav = document.querySelector(".top-nav");
+
+        main.addEventListener("mousemove", ev => {
+            if (!topnav.classList.contains("show")) {
+                topnav.classList.add("show");
+            }
+        });
+
+        topnav.addEventListener("animationend", ev => {
+            if (ev.animationName != "anim-menu-hide") return;
+            topnav.classList.remove("show");
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", onReady);
+
+
+</script>

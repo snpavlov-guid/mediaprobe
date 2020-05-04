@@ -98,6 +98,11 @@ div.effect .text-box {
         justify-content: center;
         align-content: center;
         flex-direction: column;
+        transform: translateY(100%);
+    }
+
+    div.effect .audio-box > div {
+        text-align:right;
     }
 
     div.effect .audio-box button {

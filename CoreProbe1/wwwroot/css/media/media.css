@@ -46,7 +46,7 @@ section#camera-party {
 }
 
 .video-player .controls.controls-view-animation {
-    animation: anim-controls-show ease-out 200ms 0ms, anim-controls-hold linear 5s 150ms, anim-controls-hide ease-out 1.5s 5150ms;
+    animation: anim-controls-show ease-out 200ms 0ms, anim-controls-hold linear 5s 200ms, anim-controls-hide ease-out 1.5s 5200ms;
 }
 
 @keyframes anim-controls-show {

@@ -1,11 +1,16 @@
 ﻿
 @{
     ViewData["Title"] = "Video Cube";
-    Layout = "_MasterLayout";
+
+    Layout = "_ViewLayout";
 }
 
 @section head {
     <link rel="stylesheet" href="~/css/effect/video-cube.css" />
+}
+
+@section viewmenu {
+    <partial name="Forms/_VideoEffectMenu">
 }
 
 <div class="effect">

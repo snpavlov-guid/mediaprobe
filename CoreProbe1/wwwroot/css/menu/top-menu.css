@@ -1,0 +1,158 @@
+﻿
+.top-nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    align-items: center;
+    background: linear-gradient(to right, rgba(255,255,255,1), rgba(255,255,255,0));
+    padding: 5px;
+    z-index: 111;
+    opacity: 0;
+}
+
+.top-nav.show {
+       animation: 
+           anim-menu-show ease-out 200ms 0ms, 
+           anim-menu-hold linear 5s 200ms, 
+           anim-menu-hide ease-out 1s 5200ms;
+}
+
+@keyframes anim-menu-show {
+    to {
+         opacity: 1;
+    }
+}
+
+@keyframes anim-menu-hold {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes anim-menu-hide {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.top-nav.show:hover {
+    animation-play-state: paused;
+}
+
+.top-nav a.back-link {
+    display:inline-block;
+    width:48px;
+    height:48px;
+    background-repeat:no-repeat;
+    background-image: url(/img/arrow-left-circle.svg);
+    background-size:contain;
+    padding: 0 10px;
+}
+
+ul.view-menu {
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+}
+
+ul.view-menu li {
+    margin: 0 20px;
+    transition: 0.5s;
+}
+
+ul.view-menu li a {
+    position:relative;
+    display:block;
+    padding: 5px;
+    text-decoration:none;
+    text-transform:uppercase;
+    font-size:16px;
+    font-family: sans-serif;
+    color:#00ffff;
+    transition: 0.5s;
+}
+
+ul.view-menu:hover li a {
+    transform: scale(1.15);
+    opacity: 0.2;
+    filter: blur(5);
+}
+
+ul.view-menu li a:hover {
+    transform: scale(1.25);
+    opacity: 1;
+    filter: blur(0);
+}
+
+ul.view-menu li a:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width:100%;
+    height:100%;
+    background-color: #ff00dc;
+    transition: transform 0.5s;
+    transform-origin:right;
+    transform: scaleX(0);
+    z-index: -1;
+}
+
+ul.view-menu li a:hover:before {
+    transition: transform 0.5s;
+    transform-origin:left;
+    transform: scaleX(1);
+}
+
+
+
+@media (max-width: 1200px) {
+
+}
+
+@media (max-width: 992px) {
+
+    .top-nav a.back-link {
+        width: 32px;
+        height:32px;
+    }
+
+    ul.view-menu li a {
+        font-size: 14px;
+    }
+
+}
+
+@media (max-width: 768px) {
+    .top-nav a.back-link {
+        width: 24px;
+        height: 24px;
+    }
+
+    ul.view-menu li a {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 576px) {
+    .top-nav a.back-link {
+        width: 16px;
+        height: 16px;
+    }
+
+    ul.view-menu li a {
+        font-size: 10px;
+    }
+}
+

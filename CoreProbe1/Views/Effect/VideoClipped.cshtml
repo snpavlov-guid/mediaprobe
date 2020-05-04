@@ -1,11 +1,16 @@
 ﻿
 @{
+    Layout = "_ViewLayout";
+
     ViewData["Title"] = "Video Clipping";
-    Layout = "_MasterLayout";
 }
 
 @section head {
     <link rel="stylesheet" href="~/css/effect/video-clipped.css" />
+}
+
+@section viewmenu {
+    <partial name="Forms/_VideoEffectMenu" >
 }
 
 <div class="effect">
