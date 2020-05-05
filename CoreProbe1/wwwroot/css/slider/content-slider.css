@@ -1,0 +1,14 @@
+﻿
+body {
+    margin: 0;
+    padding: 0;
+}
+
+section.main {
+    box-sizing: border-box;
+    display: flex;
+    min-height: 100vh;
+    justify-content: center;
+    align-content: center;
+    background-color: aliceblue;
+}

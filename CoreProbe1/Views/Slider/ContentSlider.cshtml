@@ -1,7 +1,14 @@
 ﻿
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Content slider";
+
+    Layout = "_ViewLayout";
 }
+
+@section head {
+    <link rel="stylesheet" href="~/css/slider/content-slider.css" />
+}
+
 
 <style type="text/css">
 
@@ -11,7 +18,7 @@
     }
 
     .holder {
-       height: 520px;
+        height: 520px;
     }
 
     .wiper, .slide, .content, .surface {
@@ -40,7 +47,6 @@
         object-fit: cover;
     }
 
-  
 </style>
 
 <div class="holder">
@@ -103,7 +109,7 @@
         });
 
         setInterval(() => {
- 
+
             for (let p = 0; p < slides.length; p++) {p
                 let pos = slides[p].style.getPropertyValue("--i") - 1;
 
@@ -122,3 +128,5 @@
     document.addEventListener("DOMContentLoaded", onReady);
 
 </script>
+
+
