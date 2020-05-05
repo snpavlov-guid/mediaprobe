@@ -52,8 +52,7 @@
 
     function onReady() {
         const checker = new app.util.check.Checker();
-        if (!checker.showNotSupported(["mixBlendMode"], "#templates #not-supported", "div.effect")) return;
-
+        if (!checker.showNotSupportedProperties(["mixBlendMode"], "#templates #not-supported", "div.effect")) return;
     }
 
     document.addEventListener("DOMContentLoaded", onReady);

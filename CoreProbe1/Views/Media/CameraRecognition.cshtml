@@ -6,6 +6,7 @@
 }
 
 @section head {
+    <link rel="stylesheet" href="~/css/common/general.css" />
     <link rel="stylesheet" href="~/css/common/loading.css" />
     <link rel="stylesheet" href="~/css/media/media.css" />
 }
@@ -14,6 +15,7 @@
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="~/js/utils/util-dom.js"></script>
     <script src="~/js/utils/util-image.js"></script>
+    <script src="~/js/utils/util-checker.js"></script>
     <script src="~/js/media/camera.js"></script>
 }
 
@@ -75,6 +77,10 @@
             <partial name="common/_loading" />
         </template>
 
+        <template id="not-supported">
+            <partial name="forms/_NotSupported" />
+        </template>
+
     </section>
 
 </div>
@@ -84,6 +90,9 @@
     document.addEventListener("DOMContentLoaded", async () => {
 
         feather.replace();
+
+        const checker = new app.util.check.Checker();
+        if (!checker.showNotSupportedObjects(["ImageCapture"], "#templates #not-supported", "section.main")) return;
 
         var cameraParty = new app.media.CameraParty(document.getElementById("camera-party"),
             {

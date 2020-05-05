@@ -53,7 +53,7 @@
     function onReady() {
 
         const checker = new app.util.check.Checker();
-        if (!checker.showNotSupported(["mixBlendMode"], "#templates #not-supported", "section.main")) return;
+        if (!checker.showNotSupportedProperties(["mixBlendMode"], "#templates #not-supported", "section.main")) return;
 
         var btn = document.getElementById("play");
         var player = document.getElementById("player");
