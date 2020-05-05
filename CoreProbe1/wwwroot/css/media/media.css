@@ -1,4 +1,8 @@
 ﻿
+.container {
+    padding: 60px 0;
+}
+
 section#camera-party {
     display:flex;
     flex-direction:column;
@@ -309,4 +313,41 @@ ul.screenshot-list li .screenshot-info {
     padding: 2pt 3pt;
 }
 
+
+
+@media (max-width: 1200px) {
+
+    ul.screenshot-list li {
+        min-width: 140px;
+        width: 140px;
+        height: 100px;
+     }
+}
+
+@media (max-width: 992px) {
+
+    ul.screenshot-list li {
+        min-width: 120px;
+        width: 120px;
+        height: 80px;
+    }
+}
+
+@media (max-width: 768px) {
+    
+    ul.screenshot-list li {
+        min-width: 100px;
+        width: 100px;
+        height: 70px;
+    }
+}
+
+@media (max-width: 576px) {
+    
+    ul.screenshot-list li {
+        min-width: 80px;
+        width: 80px;
+        height: 50px;
+    }
+}
 

@@ -12,5 +12,10 @@ namespace CoreProbe1.Controllers
         {
             return View();
         }
+
+        public IActionResult CameraRecognition()
+        {
+            return View();
+        }
     }
 }
