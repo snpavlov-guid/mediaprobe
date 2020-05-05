@@ -6,7 +6,13 @@
 }
 
 @section head {
+    <link rel="stylesheet" href="~/css/common/general.css" />
     <link rel="stylesheet" href="~/css/effect/video-cube.css" />
+}
+
+@section scripts {
+    <script src="~/js/utils/util-dom.js"></script>
+    <script src="~/js/utils/util-checker.js"></script>
 }
 
 @section viewmenu {
@@ -34,3 +40,23 @@
 
 </div>
 
+<section id="templates">
+
+    <template id="not-supported">
+        <partial name="forms/_NotSupported" />
+    </template>
+
+</section>
+
+<script type="text/javascript">
+
+    function onReady() {
+        const checker = new app.util.check.Checker();
+        if (!checker.showNotSupported(["mixBlendMode"], "#templates #not-supported", "div.effect")) return;
+
+    }
+
+    document.addEventListener("DOMContentLoaded", onReady);
+
+
+</script>

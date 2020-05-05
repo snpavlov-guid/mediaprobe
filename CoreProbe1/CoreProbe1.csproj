@@ -10,6 +10,7 @@
     <Content Remove="wwwroot\js\media\camera.ts" />
     <Content Remove="wwwroot\js\media\declarations.ts" />
     <Content Remove="wwwroot\js\media\detector.ts" />
+    <Content Remove="wwwroot\js\utils\util-checker.ts" />
     <Content Remove="wwwroot\js\utils\util-dom.ts" />
     <Content Remove="wwwroot\js\utils\util-image.ts" />
   </ItemGroup>
@@ -36,6 +37,7 @@
     <TypeScriptCompile Include="wwwroot\js\media\camera.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\declarations.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\detector.ts" />
+    <TypeScriptCompile Include="wwwroot\js\utils\util-checker.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-dom.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-image.ts" />
   </ItemGroup>

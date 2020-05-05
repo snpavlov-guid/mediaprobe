@@ -33,4 +33,9 @@ namespace app.util.dom {
         return s;
     }
 
+    export function getTemplate(selector : string): Node {
+        let template = <HTMLTemplateElement>document.querySelector(selector);
+        return template.content.cloneNode(true);
+    }
+
 }

@@ -33,6 +33,11 @@ var app;
                 return s;
             }
             dom.pad = pad;
+            function getTemplate(selector) {
+                let template = document.querySelector(selector);
+                return template.content.cloneNode(true);
+            }
+            dom.getTemplate = getTemplate;
         })(dom = util.dom || (util.dom = {}));
     })(util = app.util || (app.util = {}));
 })(app || (app = {}));
