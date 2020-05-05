@@ -6,6 +6,7 @@
 }
 
 @section head {
+    <link rel="stylesheet" href="~/css/common/loading.css" />
     <link rel="stylesheet" href="~/css/media/media.css" />
 }
 
@@ -68,6 +69,10 @@
             </div>
             <div class="screenshot-info">
             </div>
+        </template>
+
+        <template id="loading-indicator">
+            <partial name="common/_loading" />
         </template>
 
     </section>

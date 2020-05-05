@@ -129,6 +129,7 @@ namespace app.media {
         protected async loadDetector() {
 
             this.setWaitCursor(true);
+            this.setLoading(true);
 
             console.log("Detector worker loading...");
 
@@ -141,6 +142,7 @@ namespace app.media {
                 }
             })
 
+            this.setLoading(false);
             this.setWaitCursor(false);
         }
 
@@ -154,6 +156,15 @@ namespace app.media {
         public setWaitCursor(wait: boolean) {
             if (wait) this._player.classList.add("wait-cursor")
             else this._player.classList.remove("wait-cursor") 
+        }
+
+        public setLoading(wait: boolean) {
+            if (wait) {
+                this._player.appendChild(this.getLoadingTemplate());
+            } else {
+                this._player.querySelector("ul.loading").remove();
+            }
+
         }
 
         protected getVideoConstrains() : object {
@@ -676,6 +687,10 @@ namespace app.media {
 
         }
 
+        protected getLoadingTemplate(): Node {
+            let template = <HTMLTemplateElement>document.querySelector("#templates #loading-indicator");
+            return template.content.cloneNode(true);
+        }
 
     }
 

@@ -59,6 +59,7 @@ var app;
             loadDetector() {
                 return __awaiter(this, void 0, void 0, function* () {
                     this.setWaitCursor(true);
+                    this.setLoading(true);
                     console.log("Detector worker loading...");
                     this._detector = new Worker(this._detectorScript);
                     yield new Promise((resolve, reject) => {
@@ -67,6 +68,7 @@ var app;
                             resolve();
                         };
                     });
+                    this.setLoading(false);
                     this.setWaitCursor(false);
                 });
             }
@@ -80,6 +82,14 @@ var app;
                     this._player.classList.add("wait-cursor");
                 else
                     this._player.classList.remove("wait-cursor");
+            }
+            setLoading(wait) {
+                if (wait) {
+                    this._player.appendChild(this.getLoadingTemplate());
+                }
+                else {
+                    this._player.querySelector("ul.loading").remove();
+                }
             }
             getVideoConstrains() {
                 let constrains = {
@@ -471,6 +481,10 @@ var app;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
+            }
+            getLoadingTemplate() {
+                let template = document.querySelector("#templates #loading-indicator");
+                return template.content.cloneNode(true);
             }
         }
         CameraParty.requiredMediaFeatures = ['mediaDevices', 'getUserMedia'];
