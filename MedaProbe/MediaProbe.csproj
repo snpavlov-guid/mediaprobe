@@ -4,6 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>aspnet-CoreProbe1-1802C0EA-1586-4F89-82DF-DCE7A9D44F56</UserSecretsId>
     <AssemblyName>MediaProbe</AssemblyName>
+    <TypeScriptToolsVersion>3.8</TypeScriptToolsVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -44,6 +45,22 @@
 
 
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptTarget>ES2016</TypeScriptTarget>
+    <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
+    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+    <TypeScriptOutFile />
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptSourceMap>True</TypeScriptSourceMap>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptTarget>ES2016</TypeScriptTarget>
     <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
     <TypeScriptModuleKind>AMD</TypeScriptModuleKind>

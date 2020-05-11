@@ -342,3 +342,6 @@ healthchecksdb
 # Large media files
 *.mp3
 *.mp4
+
+# Custom publishing folder
+[Pp]ublishing/
