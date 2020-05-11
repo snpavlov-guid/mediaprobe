@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>aspnet-CoreProbe1-1802C0EA-1586-4F89-82DF-DCE7A9D44F56</UserSecretsId>
-    <AssemblyName>CoreProbe1</AssemblyName>
+    <AssemblyName>MediaProbe</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
