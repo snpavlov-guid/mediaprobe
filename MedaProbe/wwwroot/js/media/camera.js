@@ -137,11 +137,12 @@ var app;
             getCameraSelectionOptions() {
                 return __awaiter(this, void 0, void 0, function* () {
                     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-                        const devices = yield this._navigator.mediaDevices.enumerateDevices();
-                        const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                        const options = videoDevices.map(videoDevice => {
+                        var _a;
+                        const devices = yield ((_a = this._navigator.mediaDevices) === null || _a === void 0 ? void 0 : _a.enumerateDevices());
+                        const videoDevices = devices === null || devices === void 0 ? void 0 : devices.filter(device => device.kind === 'videoinput');
+                        const options = videoDevices ? videoDevices.map(videoDevice => {
                             return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
-                        });
+                        }) : [];
                         resolve(options);
                     }));
                 });
@@ -511,4 +512,3 @@ var app;
         media.CameraParty = CameraParty;
     })(media = app.media || (app.media = {}));
 })(app || (app = {}));
-//# sourceMappingURL=camera.js.map

@@ -218,11 +218,11 @@ namespace app.media {
         protected async getCameraSelectionOptions(): Promise<string[]> {
 
             return new Promise<string[]>(async (resolve, reject) => {
-                const devices = await this._navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                const options = videoDevices.map(videoDevice => {
+                const devices = await this._navigator.mediaDevices?.enumerateDevices();
+                const videoDevices = devices?.filter(device => device.kind === 'videoinput');
+                const options = videoDevices ? videoDevices.map(videoDevice => {
                     return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
-                });
+                }) : [];
                 resolve(options);
             });
 
