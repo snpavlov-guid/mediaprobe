@@ -118,22 +118,46 @@ nav ul li a:before {
     background-color: var(--bkc);
 }
 
-/*nav ul li:nth-child(5n+1) a:before {
-    background-color: #81ecec;
+
+
+@media (max-width: 1200px) {
+
+    nav ul li a {
+        font-size: 2.8em;
+    }
+
+    nav ul li a:before {
+        font-size: 4.5em;
+    }
 }
 
-nav ul li:nth-child(5n+2) a:before {
-    background-color: #ff7675;
+@media (max-width: 992px) {
+    nav ul li a {
+        font-size: 2.5em;
+    }
+
+    nav ul li a:before {
+        font-size: 4.2em;
+    }
 }
 
-nav ul li:nth-child(5n+3) a:before {
-    background-color: #55efc4;
+@media (max-width: 768px) {
+    nav ul li a {
+        font-size: 2.2em;
+    }
+
+    nav ul li a:before {
+        font-size: 4em;
+    }
 }
 
-nav ul li:nth-child(5n+4) a:before {
-    background-color: #a29bfe;
+@media (max-width: 576px) {
+    nav ul li a {
+        font-size: 2em;
+    }
+
+    nav ul li a:before {
+        font-size: 3.8em;
+    }
 }
 
-nav ul li:nth-child(5n+5) a:before {
-    background-color: #fd79a8;
-}*/

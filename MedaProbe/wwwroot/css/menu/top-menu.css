@@ -124,8 +124,8 @@ ul.view-menu li a:hover:before {
 @media (max-width: 992px) {
 
     .top-nav a.back-link {
-        width: 32px;
-        height:32px;
+        width: 42px;
+        height:42px;
     }
 
     ul.view-menu li a {
@@ -136,8 +136,8 @@ ul.view-menu li a:hover:before {
 
 @media (max-width: 768px) {
     .top-nav a.back-link {
-        width: 24px;
-        height: 24px;
+        width: 32px;
+        height: 32px;
     }
 
     ul.view-menu li a {
@@ -147,8 +147,8 @@ ul.view-menu li a:hover:before {
 
 @media (max-width: 576px) {
     .top-nav a.back-link {
-        width: 16px;
-        height: 16px;
+        width: 26px;
+        height: 26px;
     }
 
     ul.view-menu li a {
