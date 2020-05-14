@@ -30,8 +30,6 @@ var app;
                     this._overlayCanvas = this._element.querySelector('#player #overlay');
                     this._cameraOptions = this._element.querySelector('.video-options > select');
                     this._ratioOptions = this._element.querySelector('.video-ratio > select');
-                    this._canvasImage = this._element.querySelector('canvas#cupture-image');
-                    this._screenshotImage = this._element.querySelector('img.screenshot-image');
                     this._controls = this._element.querySelector('#player .controls');
                     this._screenshotList = this._element.querySelector('.video-screenshot .screenshot-list');
                     let btns = [];
@@ -141,8 +139,20 @@ var app;
                         const devices = yield ((_a = this._navigator.mediaDevices) === null || _a === void 0 ? void 0 : _a.enumerateDevices());
                         const videoDevices = devices === null || devices === void 0 ? void 0 : devices.filter(device => device.kind === 'videoinput');
                         const options = videoDevices ? videoDevices.map(videoDevice => {
+                            console.log(`Device: ${videoDevice.label}; Id: "${videoDevice.deviceId}"`);
                             return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
                         }) : [];
+                        resolve(options);
+                    }));
+                });
+            }
+            getCameraSelectionOptionsTest() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                        const devices = [{ deviceId: "1111111", label: "device 01" }, { deviceId: "2222222", label: "device 02" }];
+                        const options = devices.map(videoDevice => {
+                            return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
+                        });
                         resolve(options);
                     }));
                 });
@@ -159,10 +169,10 @@ var app;
                     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                         if (this.checkDeviceSupport()) {
                             try {
-                                const givenCnstraints = Object.assign(Object.assign({}, constrains), { deviceId: {
-                                        exact: deviceId
-                                    } });
-                                resolve(yield this._navigator.mediaDevices.getUserMedia(givenCnstraints));
+                                const givenConstraints = Object.assign({}, constrains);
+                                givenConstraints.video.deviceId = { exact: deviceId };
+                                console.log("Trying to get media stream with constraints: " + JSON.stringify(givenConstraints));
+                                resolve(yield this._navigator.mediaDevices.getUserMedia(givenConstraints));
                             }
                             catch (_a) {
                                 resolve(null);
@@ -172,6 +182,13 @@ var app;
                             resolve(null);
                         }
                     }));
+                });
+            }
+            stopMediaTracks(stream) {
+                if (!stream)
+                    return;
+                stream.getTracks().forEach(track => {
+                    track.stop();
                 });
             }
             setControlState(streamStarted) {
@@ -211,6 +228,7 @@ var app;
                 }
             }
             startCamera() {
+                var _a;
                 return __awaiter(this, void 0, void 0, function* () {
                     if (this._streamStarted) {
                         this._video.play();
@@ -223,6 +241,8 @@ var app;
                         this._streamStarted = true;
                         this.setControlState(true);
                     }
+                    // remove invite text
+                    (_a = this._player.querySelector(".startup-text")) === null || _a === void 0 ? void 0 : _a.remove();
                 });
             }
             pauseStream() {
@@ -242,7 +262,11 @@ var app;
             ;
             cameraOptions() {
                 return __awaiter(this, void 0, void 0, function* () {
+                    console.log(`Selected device: ${this._cameraOptions.options[this._cameraOptions.selectedIndex].text}; Id: "${this._cameraOptions.value}"`);
+                    if (!this._streamStarted)
+                        return;
                     this._streamStarted = false;
+                    this.stopMediaTracks(this._video.srcObject);
                     this.setControlState(false);
                     var stream = yield this.getUserMediaStream(this._cameraOptions.value, this.getVideoConstrains());
                     if (stream) {
@@ -250,6 +274,7 @@ var app;
                         this._streamStarted = true;
                         this.setControlState(true);
                     }
+                    this.refreshDetection(stream);
                 });
             }
             ratioOptions() {
@@ -265,18 +290,21 @@ var app;
                         this._streamStarted = true;
                         this.setControlState(true);
                     }
-                    if (stream && this._streamDetect) {
-                        this.setImageCaptureSize();
-                        this._imageCapture = new ImageCapture(stream.getVideoTracks()[0]);
-                        // continue detecting
-                        this.captureCallback();
-                    }
-                    if (!stream) {
-                        this._imageCapture = null;
-                        this._streamDetect = false;
-                        console.log("Detecting stopped");
-                    }
+                    this.refreshDetection(stream);
                 });
+            }
+            refreshDetection(stream) {
+                if (stream && this._streamDetect) {
+                    this.setImageCaptureSize();
+                    this._imageCapture = new ImageCapture(stream.getVideoTracks()[0]);
+                    // continue detecting
+                    this.captureCallback();
+                }
+                if (!stream) {
+                    this._imageCapture = null;
+                    this._streamDetect = false;
+                    console.log("Detecting stopped");
+                }
             }
             doDetect() {
                 return __awaiter(this, void 0, void 0, function* () {

@@ -25,9 +25,7 @@ namespace app.media {
         private _ratioOptions: HTMLSelectElement;
         private _video: HTMLVideoElement;
         private _overlayCanvas: HTMLCanvasElement;
-        private _canvasImage: HTMLCanvasElement;
         private _canvasVideo: HTMLCanvasElement;
-        private _screenshotImage: HTMLImageElement;
         private _btnPlay: HTMLButtonElement;
         private _btnPause: HTMLButtonElement;
         private _btnScreenshot: HTMLButtonElement;
@@ -88,8 +86,6 @@ namespace app.media {
             this._overlayCanvas = this._element.querySelector('#player #overlay');
             this._cameraOptions = this._element.querySelector('.video-options > select');
             this._ratioOptions = this._element.querySelector('.video-ratio > select');
-            this._canvasImage = this._element.querySelector('canvas#cupture-image');
-            this._screenshotImage = this._element.querySelector('img.screenshot-image');
             this._controls = this._element.querySelector('#player .controls');
             this._screenshotList = this._element.querySelector('.video-screenshot .screenshot-list');
 
@@ -221,8 +217,21 @@ namespace app.media {
                 const devices = await this._navigator.mediaDevices?.enumerateDevices();
                 const videoDevices = devices?.filter(device => device.kind === 'videoinput');
                 const options = videoDevices ? videoDevices.map(videoDevice => {
+                    console.log(`Device: ${videoDevice.label}; Id: "${videoDevice.deviceId}"`);
                     return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
                 }) : [];
+                resolve(options);
+            });
+
+        }
+
+        protected async getCameraSelectionOptionsTest(): Promise<string[]> {
+
+            return new Promise<string[]>(async (resolve, reject) => {
+                const devices = [{ deviceId: "1111111", label: "device 01" }, { deviceId: "2222222", label: "device 02"}];
+                const options = devices.map(videoDevice => {
+                    return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
+                });
                 resolve(options);
             });
 
@@ -244,14 +253,15 @@ namespace app.media {
                 if (this.checkDeviceSupport()) {
                     try {
 
-                        const givenCnstraints: MediaStreamConstraints = <MediaStreamConstraints>{
+                        const givenConstraints: MediaStreamConstraints = <MediaStreamConstraints>{
                             ...constrains,
-                            deviceId: {
-                                exact: deviceId
-                            }
                         };
 
-                        resolve(await this._navigator.mediaDevices.getUserMedia(givenCnstraints));
+                        (<MediaTrackConstraints>givenConstraints.video).deviceId = { exact: deviceId };
+
+                        console.log("Trying to get media stream with constraints: " + JSON.stringify(givenConstraints));
+
+                        resolve(await this._navigator.mediaDevices.getUserMedia(givenConstraints));
 
                     }
                     catch
@@ -262,6 +272,14 @@ namespace app.media {
                 {
                     resolve(null);
                 }
+            });
+        }
+
+        private stopMediaTracks(stream: MediaStream) {
+            if (!stream) return;
+
+            stream.getTracks().forEach(track => {
+                track.stop();
             });
         }
 
@@ -326,6 +344,10 @@ namespace app.media {
                 this.setControlState(true);
             }
 
+            // remove invite text
+            this._player.querySelector(".startup-text")?.remove();
+
+
         }
 
         protected pauseStream() {
@@ -350,16 +372,23 @@ namespace app.media {
 
         protected async cameraOptions() {
 
-           this._streamStarted = false;
-           this.setControlState(false);
+            console.log(`Selected device: ${this._cameraOptions.options[this._cameraOptions.selectedIndex].text}; Id: "${this._cameraOptions.value}"`);
+
+            if (!this._streamStarted) return;
+
+            this._streamStarted = false;
+            this.stopMediaTracks(<MediaStream>this._video.srcObject);
+            this.setControlState(false);
 
             var stream = await this.getUserMediaStream(this._cameraOptions.value, this.getVideoConstrains());
 
            if (stream) {
-                this._video.srcObject = stream;
-                this._streamStarted = true;
-                this.setControlState(true);
-           }
+               this._video.srcObject = stream;
+               this._streamStarted = true;
+               this.setControlState(true);
+            }
+
+            this.refreshDetection(stream);
 
         }
 
@@ -380,22 +409,28 @@ namespace app.media {
                 this.setControlState(true);
             } 
 
+            this.refreshDetection(stream);
+        }
+
+        protected refreshDetection(stream: MediaStream) {
+
             if (stream && this._streamDetect) {
 
                 this.setImageCaptureSize();
 
                 this._imageCapture = new ImageCapture(stream.getVideoTracks()[0]);
-  
+
                 // continue detecting
                 this.captureCallback();
             }
 
             if (!stream) {
                 this._imageCapture = null;
-
                 this._streamDetect = false;
+
                 console.log("Detecting stopped");
             }
+
         }
 
         protected async doDetect() {
