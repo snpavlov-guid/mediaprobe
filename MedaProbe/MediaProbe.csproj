@@ -12,6 +12,7 @@
     <Content Remove="wwwroot\js\media\declarations.ts" />
     <Content Remove="wwwroot\js\media\detector.ts" />
     <Content Remove="wwwroot\js\slider\liquid-slider.ts" />
+    <Content Remove="wwwroot\js\typings\pixi.js.d.ts" />
     <Content Remove="wwwroot\js\utils\util-checker.ts" />
     <Content Remove="wwwroot\js\utils\util-dom.ts" />
     <Content Remove="wwwroot\js\utils\util-image.ts" />
@@ -32,7 +33,7 @@
     <Folder Include="Areas\" />
     <Folder Include="wwwroot\img\" />
     <Folder Include="wwwroot\img\liquids\" />
-    <Folder Include="wwwroot\js\typings\" />
+    <Folder Include="wwwroot\lib\pixi\" />
     <Folder Include="wwwroot\media\" />
   </ItemGroup>
 
@@ -42,6 +43,7 @@
     <TypeScriptCompile Include="wwwroot\js\media\declarations.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\detector.ts" />
     <TypeScriptCompile Include="wwwroot\js\slider\liquid-slider.ts" />
+    <TypeScriptCompile Include="wwwroot\js\typings\pixi.js.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-checker.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-dom.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-image.ts" />
