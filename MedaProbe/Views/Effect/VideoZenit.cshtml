@@ -1,22 +1,17 @@
-﻿
-@{
+﻿@{
     Layout = "_ViewLayout";
 
-    ViewData["Title"] = "Video Clipping";
+    ViewData["Title"] = "Video Zenit";
 }
 
 @section head {
     <link rel="stylesheet" href="~/css/common/general.css" />
-    <link rel="stylesheet" href="~/css/effect/video-clipped.css" />
+    <link rel="stylesheet" href="~/css/effect/video-zenit.css" />
 }
 
 @section scripts {
     <script src="~/js/utils/util-dom.js"></script>
     <script src="~/js/utils/util-checker.js"></script>
-}
-
-@section viewmenu {
-    <partial name="Forms/_VideoEffectMenu">
 }
 
 <div class="effect">
@@ -25,11 +20,12 @@
            src="~/media/y2mate.com - ФК Зенит _ FC Zenit_Z95FaXRhKik_1080p.mp4">
     </video>
 
-    <div class="text-box">
-        <img class="logo" src="~/img/FC_Zenit_1_star_2015_logo.svg" />
-        <span class="name">FC Zenit</span>
-        <span class="city">Saint Petersburg</span>
-    </div>
+    <div class="shade"></div>
+
+    <svg class="banner banner-view-animation" viewBox="0 0 300 100">
+        <text x="50%" y="50%" text-anchor="middle">Зенит - Санкт-Петербург</text>
+        <text x="50%" y="70%" text-anchor="middle">2020</text>
+    </svg>
 
     <div class="audio-box">
         <div>
@@ -40,13 +36,6 @@
 
 </div>
 
-<section id="templates">
-
-    <template id="not-supported">
-        <partial name="forms/_NotSupported" />
-    </template>
-
-</section>
 
 <script type="text/javascript">
 
@@ -54,6 +43,12 @@
 
         const checker = new app.util.check.Checker();
         if (!checker.showNotSupportedProperties(["mixBlendMode"], "#templates #not-supported", "section.main")) return;
+
+        const bannerAnimClass = "banner-view-animation";
+        const bannerEndAnim = "anim-banner-hide";
+
+        var effect = document.querySelector(".effect"); 
+        var banner = document.querySelector(".banner"); 
 
         var btn = document.getElementById("play");
         var player = document.getElementById("player");
@@ -73,6 +68,17 @@
 
         document.addEventListener("keyup", togglePlay)
 
+        effect.addEventListener("mousemove", ev => {
+            if (!banner.classList.contains(bannerAnimClass)) {
+                banner.classList.add(bannerAnimClass);
+            }
+        });
+
+        banner.addEventListener("animationend", ev => {
+            if (ev.animationName != bannerEndAnim) return;
+            banner.classList.remove(bannerAnimClass);
+        });
+
     }
 
     document.addEventListener("DOMContentLoaded", onReady);
@@ -80,3 +86,8 @@
 
 </script>
 
+
+   var main = document.querySelector("section.main");
+        var topnav = document.querySelector(".top-nav");
+
+ 

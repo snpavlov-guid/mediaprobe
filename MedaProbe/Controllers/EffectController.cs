@@ -22,5 +22,10 @@ namespace CoreProbe1.Controllers
         {
             return View();
         }
+
+        public IActionResult VideoZenit()
+        {
+            return View();
+        }
     }
 }

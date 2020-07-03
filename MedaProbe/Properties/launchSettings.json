@@ -15,7 +15,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "slider/LiquidSlider",
+      "launchUrl": "effect/VideoZenit",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
