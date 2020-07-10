@@ -14,6 +14,7 @@
     <script src="https://unpkg.com/imagesloaded@4/imagesloaded.pkgd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.2.4/pixi.min.js"></script>
 
+    <script src="~/js/utils/util-data.js"></script>
     <script src="~/js/slider/liquid-slider.js"></script>
 }
 
@@ -33,15 +34,23 @@
         height: 100%;
         overflow: hidden;
     }
-
+   
     .wiper .slide {
         z-index: 0;
-        /*left: calc(var(--i) * 100%);*/
-        left:0;
+        left: calc(var(--i) * 100%);
         background-repeat: no-repeat;
         background-size: cover;
         transition: left ease-out var(--wipe-time);
+        display:none;
     }
+
+    .wiper canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right:0;
+        border:0;
+     }
 
     .wiper .slide .content {
         transition: transform ease-out var(--zoom-time) var(--wipe-time);
@@ -55,10 +64,20 @@
 
 <div class="holder">
 
-    <div class="wiper">
+    <div id="liquid-slider" class="wiper">
         <div class="slide" style="--i:0">
             <div class="content">
                 <img class="surface" src="~/img/liquids/13.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:1">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/2.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:2">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/15.jpg" />
             </div>
         </div>
     </div>
@@ -69,6 +88,15 @@
 
     function onReady() {
 
+        const lqslider =
+            new app.slider.LiquidSlider(document.getElementById("liquid-slider"),
+                {
+                    displacementImage: "@Url.Content("~/img/liquids/dmaps/2048x2048/clouds.jpg")",
+                    autoPlay: true,
+                    centerSprites: false,
+                    interactive: true,
+                    wacky: true,
+                });
     }
 
     document.addEventListener("DOMContentLoaded", onReady);

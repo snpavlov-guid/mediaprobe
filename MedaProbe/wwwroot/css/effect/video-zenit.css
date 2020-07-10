@@ -71,7 +71,7 @@ div.effect > video {
     width: 100%;
     height: 100%;
     opacity: 0;
-     --ripple-color: gold;
+     --ripple-color: yellow;
     --ripple-end: lightgoldenrodyellow;
     --ripple-color2: darkgoldenrod;
     --ripple-end2: goldenrod;
@@ -82,7 +82,7 @@ svg.banner text {
     font-family: 'Concert One', cursive;
     font-weight: 900;
     font-size: 1.2rem;
-    fill: yellow;
+    fill: gold;
     letter-spacing: 1px;
     text-shadow: 0 0 30px var(--ripple-color), 0 0 50px var(--ripple-end);
     /*  animation: bannerglowing 10s linear infinite;

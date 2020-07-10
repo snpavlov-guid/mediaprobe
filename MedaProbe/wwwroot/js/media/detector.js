@@ -27,3 +27,4 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         //    self.postMessage({ ok: false, bbox: null })
     });
 }))();
+//# sourceMappingURL=detector.js.map
