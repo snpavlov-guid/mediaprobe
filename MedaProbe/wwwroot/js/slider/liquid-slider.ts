@@ -1,5 +1,4 @@
 ﻿
-
 namespace app.slider {
 
     export interface ISliderOptions {
@@ -14,6 +13,7 @@ namespace app.slider {
         fullScreen: boolean,
         displaceScale: number[],
         displacementImage: string,
+        displacementImageScale: number,
         navElement: any,
         displaceAutoFit: boolean,
         wacky: boolean,
@@ -52,7 +52,9 @@ namespace app.slider {
             autoPlay: true,
             autoPlaySpeed: [10, 3],
             displaceScale: [200, 70],
+            displaceScaleTo: [20, 20],
             displacementImage: "",
+            displacementImageScale: 2,
             displaceAutoFit: false,
             wacky: false,
             interactive: false,
@@ -76,7 +78,7 @@ namespace app.slider {
 
             this.renderStage();
 
-            this.startSlider();
+            this.runSlider();
 
             this.resizeSlider();
 
@@ -120,6 +122,7 @@ namespace app.slider {
                 fontSize: 14
             });
 
+
         }
 
         protected initDisplacementFilter(
@@ -136,8 +139,8 @@ namespace app.slider {
                 sprite.y = this._renderer.height / 2;
             }
 
-            sprite.scale.x = 2;
-            sprite.scale.y = 2;
+            sprite.scale.x = this._options.displacementImageScale;
+            sprite.scale.y = this._options.displacementImageScale;
 
             // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
             //filter.autoFit = this._options.displaceAutoFit;
@@ -229,18 +232,69 @@ namespace app.slider {
 
         }
 
-        protected startSlider() {
+        protected runSlider() {
 
-            setInterval(() => {
+            setInterval(async () => {
 
-                this._slidesContainer.children[this._currentSprite].alpha = 0;
+                const newIndex = (this._currentSprite + 1) % this.sprites();
 
-                this._currentSprite = (this._currentSprite + 1) % this.sprites();
+                await this._slideTransition(newIndex);
 
-                this._slidesContainer.children[this._currentSprite].alpha = 1;
+                //this._slidesContainer.children[this._currentSprite].alpha = 0;
+
+                //this._currentSprite = (this._currentSprite + 1) % this.sprites();
+
+                //this._slidesContainer.children[this._currentSprite].alpha = 1;
              
 
             }, this._options.timeout);
+        }
+
+        protected async _slideTransition(newIndex: number): Promise<void> {
+            const self = this;
+
+            return await new Promise<void>((resolve, reject) => {
+
+                const timelineMax = (window as any).TimelineMax;
+                const power1 = (window as any).Power1;
+                const power2 = (window as any).Power2;
+
+                const baseTimeline = new timelineMax({
+                    onComplete: function () {
+
+                        self._currentSprite = newIndex;
+
+                        if (self._options.wacky) {
+                            //self._displacementSprite.scale.set(1);
+                            self._displacementSprite.scale.x = this._options.displacementImageScale;
+                            self._displacementSprite.scale.y = this._options.displacementImageScale;
+                        }          
+
+                        resolve();
+
+                    }, onUpdate: function () {
+
+                        if (self._options.wacky) {
+                            self._displacementSprite.rotation += baseTimeline.progress() * 0.02;
+                            self._displacementSprite.scale.set(baseTimeline.progress() * 3);
+                        }          
+                    }
+                });
+
+                baseTimeline.clear();
+
+                if (baseTimeline.isActive()) {
+                    return;
+                }
+
+                baseTimeline
+                    .to(self._displacementFilter.scale, 0.8, { x: self._options.displaceScale[0], y: self._options.displaceScale[1], ease: power2.easeIn })
+                    .to(self._slidesContainer.children[self._currentSprite], 0.5, { alpha: 0, ease: power2.easeOut }, 0.4)
+                    .to(self._slidesContainer.children[newIndex], 0.8, { alpha: 1, ease: power2.easeOut }, 1)
+                    .to(self._displacementFilter.scale, 0.7, { x: self._options.displaceScaleTo[0], y: self._options.displaceScaleTo[1], ease: power1.easeOut }, 0.9);
+
+            })
+
         }
 
 
@@ -265,9 +319,8 @@ namespace app.slider {
             else
                 result.offset.x = (slider.clientWidth - cw) / 2;
 
-            console.log("sw: " + slider.clientWidth + ", cw: " + cw + ", xo: " + result.offset.x);
-            console.log("sh: " + slider.clientHeight + ", ch: " + ch + ", yo: " + result.offset.y);
-
+            //console.log("sw: " + slider.clientWidth + ", cw: " + cw + ", xo: " + result.offset.x);
+            //console.log("sh: " + slider.clientHeight + ", ch: " + ch + ", yo: " + result.offset.y);
 
             return result;
 

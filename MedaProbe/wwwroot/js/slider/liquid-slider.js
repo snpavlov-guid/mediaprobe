@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var app;
 (function (app) {
     var slider;
@@ -11,7 +20,7 @@ var app;
                 this.initDisplacementFilter(this._displacementFilter, this._displacementSprite);
                 this.loadSlides(this.querySprites());
                 this.renderStage();
-                this.startSlider();
+                this.runSlider();
                 this.resizeSlider();
                 window.addEventListener("resize", ev => { this.resizeSlider(); });
             }
@@ -52,8 +61,8 @@ var app;
                     sprite.x = this._renderer.width / 2;
                     sprite.y = this._renderer.height / 2;
                 }
-                sprite.scale.x = 2;
-                sprite.scale.y = 2;
+                sprite.scale.x = this._options.displacementImageScale;
+                sprite.scale.y = this._options.displacementImageScale;
                 // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
                 //filter.autoFit = this._options.displaceAutoFit;
             }
@@ -114,12 +123,49 @@ var app;
                     });
                 }
             }
-            startSlider() {
-                setInterval(() => {
-                    this._slidesContainer.children[this._currentSprite].alpha = 0;
-                    this._currentSprite = (this._currentSprite + 1) % this.sprites();
-                    this._slidesContainer.children[this._currentSprite].alpha = 1;
-                }, this._options.timeout);
+            runSlider() {
+                setInterval(() => __awaiter(this, void 0, void 0, function* () {
+                    const newIndex = (this._currentSprite + 1) % this.sprites();
+                    yield this._slideTransition(newIndex);
+                    //this._slidesContainer.children[this._currentSprite].alpha = 0;
+                    //this._currentSprite = (this._currentSprite + 1) % this.sprites();
+                    //this._slidesContainer.children[this._currentSprite].alpha = 1;
+                }), this._options.timeout);
+            }
+            _slideTransition(newIndex) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const self = this;
+                    return yield new Promise((resolve, reject) => {
+                        const timelineMax = window.TimelineMax;
+                        const power1 = window.Power1;
+                        const power2 = window.Power2;
+                        const baseTimeline = new timelineMax({
+                            onComplete: function () {
+                                self._currentSprite = newIndex;
+                                if (self._options.wacky) {
+                                    //self._displacementSprite.scale.set(1);
+                                    self._displacementSprite.scale.x = this._options.displacementImageScale;
+                                    self._displacementSprite.scale.y = this._options.displacementImageScale;
+                                }
+                                resolve();
+                            }, onUpdate: function () {
+                                if (self._options.wacky) {
+                                    self._displacementSprite.rotation += baseTimeline.progress() * 0.02;
+                                    self._displacementSprite.scale.set(baseTimeline.progress() * 3);
+                                }
+                            }
+                        });
+                        baseTimeline.clear();
+                        if (baseTimeline.isActive()) {
+                            return;
+                        }
+                        baseTimeline
+                            .to(self._displacementFilter.scale, 0.8, { x: self._options.displaceScale[0], y: self._options.displaceScale[1], ease: power2.easeIn })
+                            .to(self._slidesContainer.children[self._currentSprite], 0.5, { alpha: 0, ease: power2.easeOut }, 0.4)
+                            .to(self._slidesContainer.children[newIndex], 0.8, { alpha: 1, ease: power2.easeOut }, 1)
+                            .to(self._displacementFilter.scale, 0.7, { x: self._options.displaceScaleTo[0], y: self._options.displaceScaleTo[1], ease: power1.easeOut }, 0.9);
+                    });
+                });
             }
             calcStageScale(slider, stageWidth, stageHeight) {
                 const result = {};
@@ -134,8 +180,8 @@ var app;
                     result.offset.y = (slider.clientHeight - ch) / 2;
                 else
                     result.offset.x = (slider.clientWidth - cw) / 2;
-                console.log("sw: " + slider.clientWidth + ", cw: " + cw + ", xo: " + result.offset.x);
-                console.log("sh: " + slider.clientHeight + ", ch: " + ch + ", yo: " + result.offset.y);
+                //console.log("sw: " + slider.clientWidth + ", cw: " + cw + ", xo: " + result.offset.x);
+                //console.log("sh: " + slider.clientHeight + ", ch: " + ch + ", yo: " + result.offset.y);
                 return result;
             }
             resizeSlider() {
@@ -156,7 +202,9 @@ var app;
             autoPlay: true,
             autoPlaySpeed: [10, 3],
             displaceScale: [200, 70],
+            displaceScaleTo: [20, 20],
             displacementImage: "",
+            displacementImageScale: 2,
             displaceAutoFit: false,
             wacky: false,
             interactive: false,
