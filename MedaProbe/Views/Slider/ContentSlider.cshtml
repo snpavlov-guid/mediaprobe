@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="~/css/slider/content-slider.css" />
 }
 
+@section viewmenu {
+    <partial name="Forms/_SlidersMenu">
+}
+
+
 
 <style type="text/css">
 
@@ -31,22 +36,21 @@
         overflow: hidden;
     }
 
-    .wiper .slide {
-        z-index: 0;
-        left: calc(var(--i) * 100%);
-        background-repeat: no-repeat;
-        background-size: cover;
-        transition: left ease-out var(--wipe-time);
-    }
+        .wiper .slide {
+            z-index: 0;
+            left: calc(var(--i) * 100%);
+            background-repeat: no-repeat;
+            background-size: cover;
+            transition: left ease-out var(--wipe-time);
+        }
 
-    .wiper .slide .content {
-        transition: transform ease-out var(--zoom-time) var(--wipe-time);
-    }
+            .wiper .slide .content {
+                transition: transform ease-out var(--zoom-time) var(--wipe-time);
+            }
 
     img.surface, video.surface {
         object-fit: cover;
     }
-
 </style>
 
 <div class="holder">
@@ -84,7 +88,7 @@
         </div>
         <div class="slide" style="--i:6">
             <div class="content">
-                <video class="surface" src="~/img/posters/video-01.mp4" typeof="video/mp4" muted autoplay loop ></video>
+                <video class="surface" src="~/img/posters/video-01.mp4" typeof="video/mp4" muted autoplay loop></video>
             </div>
         </div>
         <div class="slide" style="--i:7">
@@ -109,7 +113,8 @@
 
         setInterval(() => {
 
-            for (let p = 0; p < slides.length; p++) {p
+            for (let p = 0; p < slides.length; p++) {
+                p
                 let pos = slides[p].style.getPropertyValue("--i") - 1;
 
                 slides[p].style.visibility = pos < -1 ? "hidden" : "initial";
