@@ -9,9 +9,9 @@ namespace app.slider {
         centerSprites: boolean,
         texts: string[],
         autoPlay: boolean,
-        autoPlaySpeed: number[],
+        autoPlaySpeed: [number, number],
         fullScreen: boolean,
-        displaceScale: number[],
+        displaceScale: [number, number],
         displacementImage: string,
         displacementImageScale: number,
         navElement: any,
@@ -19,16 +19,26 @@ namespace app.slider {
         wacky: boolean,
         interactive: boolean,
         interactionEvent: string,
-        displaceScaleTo: number[],
+        displaceScaleTo: [number, number],
         textColor: string,
         displacementCenter: boolean,
         dispatchPointerOver: boolean,
         slideSelector: string;
         spriteSelector: string,
     }
-  
 
-    export class LiquidSlider {
+
+    export interface ISlideProxy {
+        current(): PIXI.DisplayObject,
+        item(index: number): PIXI.DisplayObject,
+        next(): PIXI.DisplayObject,
+        displacementFilter: () => PIXI.filters.DisplacementFilter,
+        displaceScale: () => [number, number],
+        displaceScaleTo: () => [number, number]
+    }
+
+
+    export class LiquidSlider implements ISlideProxy {
 
         private _options: ISliderOptions;
 
@@ -236,9 +246,9 @@ namespace app.slider {
 
             setInterval(async () => {
 
-                const newIndex = (this._currentSprite + 1) % this.sprites();
+                //const newIndex = (this._currentSprite + 1) % this.sprites();
 
-                await this._slideTransition(newIndex);
+                await this._slideTransition();
 
                 //this._slidesContainer.children[this._currentSprite].alpha = 0;
 
@@ -250,19 +260,15 @@ namespace app.slider {
             }, this._options.timeout);
         }
 
-        protected async _slideTransition(newIndex: number): Promise<void> {
+        protected async _slideTransition(): Promise<void> {
             const self = this;
 
             return await new Promise<void>((resolve, reject) => {
 
-                const timelineMax = (window as any).TimelineMax;
-                const power1 = (window as any).Power1;
-                const power2 = (window as any).Power2;
-
-                const baseTimeline = new timelineMax({
+               const baseTimeline = new window.TimelineMax({
                     onComplete: function () {
 
-                        self._currentSprite = newIndex;
+                        self._currentSprite = self.nextSlideIndex();
 
                         if (self._options.wacky) {
                             //self._displacementSprite.scale.set(1);
@@ -287,11 +293,14 @@ namespace app.slider {
                     return;
                 }
 
-                baseTimeline
-                    .to(self._displacementFilter.scale, 0.8, { x: self._options.displaceScale[0], y: self._options.displaceScale[1], ease: power2.easeIn })
-                    .to(self._slidesContainer.children[self._currentSprite], 0.5, { alpha: 0, ease: power2.easeOut }, 0.4)
-                    .to(self._slidesContainer.children[newIndex], 0.8, { alpha: 1, ease: power2.easeOut }, 1)
-                    .to(self._displacementFilter.scale, 0.7, { x: self._options.displaceScaleTo[0], y: self._options.displaceScaleTo[1], ease: power1.easeOut }, 0.9);
+                // Default slide transition animation
+                LiquidSlider.slideTransitionAnimation(self, baseTimeline);
+
+                //baseTimeline
+                //    .to(self.displacementFilter().scale, 0.8, { x: self.displaceScale()[0], y: self.displaceScale()[1], ease: window.Power2.easeIn })
+                //    .to(self.current(), 0.5, { alpha: 0, ease: window.Power2.easeOut }, 0.4)
+                //    .to(self.next(), 0.8, { alpha: 1, ease: window.Power2.easeOut }, 1)
+                //    .to(self.displacementFilter().scale, 0.7, { x: self.displaceScaleTo()[0], y: self.displaceScaleTo()[1], ease: window.Power1.easeOut }, 0.9);
 
             })
 
@@ -338,6 +347,59 @@ namespace app.slider {
             this._stage.y = stageView.offset.y;
 
         }
+
+        protected nextSlideIndex(): number {
+            return (this._currentSprite + 1) % this.sprites();
+        }
+
+        protected prevSlideIndex(): number {
+            const prev = this._currentSprite - 1;
+            return prev < 0 ? this.sprites() - 1 : prev;
+        }
+
+        // ISlideProxy interface
+
+        public current(): PIXI.DisplayObject {
+            return this._slidesContainer.children[this._currentSprite];
+        }
+
+        public item(index : number): PIXI.DisplayObject {
+            return this._slidesContainer.children[index];
+        }
+
+        public next(): PIXI.DisplayObject {
+            return this._slidesContainer.children[this.nextSlideIndex()];
+        }
+
+        public displacementFilter(): PIXI.filters.DisplacementFilter {
+            return this._displacementFilter;
+        }
+   
+        public displaceScale(): [number, number] {
+            return this._options.displaceScale;
+        }
+
+        public displaceScaleTo(): [number, number] {
+            return this._options.displaceScaleTo;
+        }
+
+        // *end*
+
+        // Default transition methods
+
+        static slideTransitionAnimation(slide: ISlideProxy, baseTimeline: gsapProxy.TimelineMax) {
+
+            baseTimeline
+                .to(slide.displacementFilter().scale, 0.8, { x: slide.displaceScale()[0], y: slide.displaceScale()[1], ease: window.Power2.easeIn })
+                .to(slide.current(), 0.5, { alpha: 0, ease: window.Power2.easeOut }, 0.4)
+                .to(slide.next(), 0.8, { alpha: 1, ease: window.Power2.easeOut }, 1)
+                .to(slide.displacementFilter().scale, 0.7, { x: slide.displaceScaleTo()[0], y: slide.displaceScaleTo()[1], ease: window.Power1.easeOut }, 0.9);
+
+        }
+
+
+        // *end*
+
 
 
     }

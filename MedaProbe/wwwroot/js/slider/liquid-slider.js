@@ -125,23 +125,20 @@ var app;
             }
             runSlider() {
                 setInterval(() => __awaiter(this, void 0, void 0, function* () {
-                    const newIndex = (this._currentSprite + 1) % this.sprites();
-                    yield this._slideTransition(newIndex);
+                    //const newIndex = (this._currentSprite + 1) % this.sprites();
+                    yield this._slideTransition();
                     //this._slidesContainer.children[this._currentSprite].alpha = 0;
                     //this._currentSprite = (this._currentSprite + 1) % this.sprites();
                     //this._slidesContainer.children[this._currentSprite].alpha = 1;
                 }), this._options.timeout);
             }
-            _slideTransition(newIndex) {
+            _slideTransition() {
                 return __awaiter(this, void 0, void 0, function* () {
                     const self = this;
                     return yield new Promise((resolve, reject) => {
-                        const timelineMax = window.TimelineMax;
-                        const power1 = window.Power1;
-                        const power2 = window.Power2;
-                        const baseTimeline = new timelineMax({
+                        const baseTimeline = new window.TimelineMax({
                             onComplete: function () {
-                                self._currentSprite = newIndex;
+                                self._currentSprite = self.nextSlideIndex();
                                 if (self._options.wacky) {
                                     //self._displacementSprite.scale.set(1);
                                     self._displacementSprite.scale.x = this._options.displacementImageScale;
@@ -159,11 +156,13 @@ var app;
                         if (baseTimeline.isActive()) {
                             return;
                         }
-                        baseTimeline
-                            .to(self._displacementFilter.scale, 0.8, { x: self._options.displaceScale[0], y: self._options.displaceScale[1], ease: power2.easeIn })
-                            .to(self._slidesContainer.children[self._currentSprite], 0.5, { alpha: 0, ease: power2.easeOut }, 0.4)
-                            .to(self._slidesContainer.children[newIndex], 0.8, { alpha: 1, ease: power2.easeOut }, 1)
-                            .to(self._displacementFilter.scale, 0.7, { x: self._options.displaceScaleTo[0], y: self._options.displaceScaleTo[1], ease: power1.easeOut }, 0.9);
+                        // Default slide transition animation
+                        LiquidSlider.slideTransitionAnimation(self, baseTimeline);
+                        //baseTimeline
+                        //    .to(self.displacementFilter().scale, 0.8, { x: self.displaceScale()[0], y: self.displaceScale()[1], ease: window.Power2.easeIn })
+                        //    .to(self.current(), 0.5, { alpha: 0, ease: window.Power2.easeOut }, 0.4)
+                        //    .to(self.next(), 0.8, { alpha: 1, ease: window.Power2.easeOut }, 1)
+                        //    .to(self.displacementFilter().scale, 0.7, { x: self.displaceScaleTo()[0], y: self.displaceScaleTo()[1], ease: window.Power1.easeOut }, 0.9);
                     });
                 });
             }
@@ -190,6 +189,41 @@ var app;
                 this._stage.scale = stageView.scale;
                 this._stage.x = stageView.offset.x;
                 this._stage.y = stageView.offset.y;
+            }
+            nextSlideIndex() {
+                return (this._currentSprite + 1) % this.sprites();
+            }
+            prevSlideIndex() {
+                const prev = this._currentSprite - 1;
+                return prev < 0 ? this.sprites() - 1 : prev;
+            }
+            // ISlideProxy interface
+            current() {
+                return this._slidesContainer.children[this._currentSprite];
+            }
+            item(index) {
+                return this._slidesContainer.children[index];
+            }
+            next() {
+                return this._slidesContainer.children[this.nextSlideIndex()];
+            }
+            displacementFilter() {
+                return this._displacementFilter;
+            }
+            displaceScale() {
+                return this._options.displaceScale;
+            }
+            displaceScaleTo() {
+                return this._options.displaceScaleTo;
+            }
+            // *end*
+            // Default transition methods
+            static slideTransitionAnimation(slide, baseTimeline) {
+                baseTimeline
+                    .to(slide.displacementFilter().scale, 0.8, { x: slide.displaceScale()[0], y: slide.displaceScale()[1], ease: window.Power2.easeIn })
+                    .to(slide.current(), 0.5, { alpha: 0, ease: window.Power2.easeOut }, 0.4)
+                    .to(slide.next(), 0.8, { alpha: 1, ease: window.Power2.easeOut }, 1)
+                    .to(slide.displacementFilter().scale, 0.7, { x: slide.displaceScaleTo()[0], y: slide.displaceScaleTo()[1], ease: window.Power1.easeOut }, 0.9);
             }
         }
         LiquidSlider._defaultOptions = {
