@@ -137,8 +137,8 @@ var app;
                 ticker.autoStart = true;
                 if (this._options.autoPlay) {
                     ticker.add(delta => {
-                        this._displacementSprite.x += this._options.autoPlaySpeed[0] * delta;
-                        this._displacementSprite.y += this._options.autoPlaySpeed[1];
+                        this._displacementSprite.x += this.autoPlaySpeed()[0] * delta;
+                        this._displacementSprite.y += this.autoPlaySpeed()[1];
                         this._renderer.render(this._stage);
                     });
                 }
@@ -242,6 +242,13 @@ var app;
             }
             displacementFilter() {
                 return this._displacementFilter;
+            }
+            autoPlaySpeed() {
+                if (this._slidesBinding[this._currentSprite]) {
+                    const key = this._slidesBinding[this._currentSprite];
+                    return this._slidesOptions[key].autoPlaySpeed;
+                }
+                return this._defaultSlideOptions.autoPlaySpeed;
             }
             displaceScale() {
                 if (this._slidesBinding[this._currentSprite]) {

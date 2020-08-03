@@ -40,6 +40,7 @@ namespace app.slider {
         item(index: number): PIXI.DisplayObject,
         next(): PIXI.DisplayObject,
         displacementFilter: () => PIXI.filters.DisplacementFilter,
+        autoPlaySpeed: () => [number, number],
         displaceScale: () => [number, number],
         displaceScaleTo: () => [number, number]
     }
@@ -271,8 +272,8 @@ namespace app.slider {
 
                 ticker.add(delta => {
 
-                    this._displacementSprite.x += this._options.autoPlaySpeed[0] * delta;
-                    this._displacementSprite.y += this._options.autoPlaySpeed[1];
+                    this._displacementSprite.x += this.autoPlaySpeed()[0] * delta;
+                    this._displacementSprite.y += this.autoPlaySpeed()[1];
 
                     this._renderer.render(this._stage);
 
@@ -428,6 +429,15 @@ namespace app.slider {
 
         public displacementFilter(): PIXI.filters.DisplacementFilter {
             return this._displacementFilter;
+        }
+
+        public autoPlaySpeed(): [number, number] {
+            if (this._slidesBinding[this._currentSprite]) {
+                const key = this._slidesBinding[this._currentSprite];
+                return this._slidesOptions[key].autoPlaySpeed;
+            }
+
+            return this._defaultSlideOptions.autoPlaySpeed;
         }
    
         public displaceScale(): [number, number] {
