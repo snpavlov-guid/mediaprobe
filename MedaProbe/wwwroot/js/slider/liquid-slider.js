@@ -11,10 +11,14 @@ var app;
 (function (app) {
     var slider;
     (function (slider_1) {
+        const SlideOptionKeyAttrName = "data-slide-options-key";
         class LiquidSlider {
             constructor(element, options) {
                 this._element = element;
                 this._options = app.util.data.extend(true, LiquidSlider._defaultOptions, options);
+                this._defaultSlideOptions = this.getDefaultSileOptions(this._options);
+                this._slidesOptions = this.getSlidesOptions(this._options, this._defaultSlideOptions);
+                this._slidesBinding = {};
                 this._currentSprite = 0;
                 this.initializePixi();
                 this.initDisplacementFilter(this._displacementFilter, this._displacementSprite);
@@ -26,6 +30,24 @@ var app;
             }
             sprites() {
                 return this._slidesContainer.children.length;
+            }
+            getDefaultSileOptions(options) {
+                return {
+                    autoPlaySpeed: options.autoPlaySpeed,
+                    displaceScale: options.displaceScale,
+                    displaceScaleTo: options.displaceScaleTo,
+                    transitionMethod: LiquidSlider.slideTransitionAnimation,
+                };
+            }
+            getSlidesOptions(options, defaultSlide) {
+                var slideOptions = {};
+                var givenOptions = options.slideOptions;
+                if (!givenOptions)
+                    return slideOptions;
+                for (let key in givenOptions) {
+                    slideOptions[key] = app.util.data.extend(true, {}, defaultSlide, givenOptions[key]);
+                }
+                return slideOptions;
             }
             initializePixi() {
                 this._renderer = PIXI.autoDetectRenderer({
@@ -73,12 +95,15 @@ var app;
                     .forEach(el => {
                     const slide = {};
                     slide.order = parseInt(getComputedStyle(el).getPropertyValue("--i"));
+                    slide.optionKey = el.getAttribute(SlideOptionKeyAttrName);
                     slide.sprites = [];
                     el.querySelectorAll(this._options.spriteSelector)
                         .forEach(spi => {
                         slide.sprites.push(spi.src);
                     });
                     slides.push(slide);
+                    if (slide.optionKey)
+                        this._slidesBinding[slide.order] = slide.optionKey;
                 });
                 slides.sort((a, b) => {
                     if (a.order > b.order)
@@ -156,8 +181,16 @@ var app;
                         if (baseTimeline.isActive()) {
                             return;
                         }
-                        // Default slide transition animation
-                        LiquidSlider.slideTransitionAnimation(self, baseTimeline);
+                        //Check for slide options
+                        if (self._slidesBinding[self._currentSprite]) {
+                            const slideKey = this._slidesBinding[this._currentSprite];
+                            self._slidesOptions[slideKey].transitionMethod(self, baseTimeline);
+                        }
+                        else {
+                            // Default slide transition animation
+                            self._defaultSlideOptions.transitionMethod(self, baseTimeline);
+                        }
+                        //LiquidSlider.slideTransitionAnimation(self, baseTimeline);
                         //baseTimeline
                         //    .to(self.displacementFilter().scale, 0.8, { x: self.displaceScale()[0], y: self.displaceScale()[1], ease: window.Power2.easeIn })
                         //    .to(self.current(), 0.5, { alpha: 0, ease: window.Power2.easeOut }, 0.4)
@@ -211,10 +244,18 @@ var app;
                 return this._displacementFilter;
             }
             displaceScale() {
-                return this._options.displaceScale;
+                if (this._slidesBinding[this._currentSprite]) {
+                    const key = this._slidesBinding[this._currentSprite];
+                    return this._slidesOptions[key].displaceScale;
+                }
+                return this._defaultSlideOptions.displaceScale;
             }
             displaceScaleTo() {
-                return this._options.displaceScaleTo;
+                if (this._slidesBinding[this._currentSprite]) {
+                    const key = this._slidesBinding[this._currentSprite];
+                    return this._slidesOptions[key].displaceScaleTo;
+                }
+                return this._defaultSlideOptions.displaceScaleTo;
             }
             // *end*
             // Default transition methods

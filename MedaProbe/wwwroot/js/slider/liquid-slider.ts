@@ -25,8 +25,15 @@ namespace app.slider {
         dispatchPointerOver: boolean,
         slideSelector: string;
         spriteSelector: string,
+        slideOptions: { [key: string]: ISlideOptions };
     }
 
+    export interface ISlideOptions {
+        autoPlaySpeed: [number, number],
+        displaceScale: [number, number],
+        displaceScaleTo: [number, number],
+        transitionMethod(slide: ISlideProxy, baseTimeline: gsapProxy.TimelineMax);
+    }
 
     export interface ISlideProxy {
         current(): PIXI.DisplayObject,
@@ -37,10 +44,14 @@ namespace app.slider {
         displaceScaleTo: () => [number, number]
     }
 
+    const SlideOptionKeyAttrName: string = "data-slide-options-key";
 
     export class LiquidSlider implements ISlideProxy {
 
         private _options: ISliderOptions;
+        private _defaultSlideOptions: ISlideOptions;
+        private _slidesOptions: { [key: string]: ISlideOptions };
+        private _slidesBinding: { [key: number]: string };
 
         private _currentSprite: number;
 
@@ -51,6 +62,8 @@ namespace app.slider {
         private _displacementSprite: PIXI.Sprite;
         private _displacementFilter: PIXI.filters.DisplacementFilter;
         private _textStyle;
+
+       
 
         static _defaultOptions = <ISliderOptions>{
             timeout: 5000,
@@ -78,6 +91,12 @@ namespace app.slider {
 
             this._options = <ISliderOptions>app.util.data.extend(true, LiquidSlider._defaultOptions, options);
 
+            this._defaultSlideOptions = this.getDefaultSileOptions(this._options);
+
+            this._slidesOptions = this.getSlidesOptions(this._options, this._defaultSlideOptions);
+
+            this._slidesBinding = {};
+
             this._currentSprite = 0;
 
             this.initializePixi();
@@ -98,6 +117,28 @@ namespace app.slider {
 
         protected sprites(): number {
             return this._slidesContainer.children.length;
+        }
+
+        protected getDefaultSileOptions(options : ISliderOptions): ISlideOptions {
+            return <ISlideOptions>{
+                autoPlaySpeed: options.autoPlaySpeed,
+                displaceScale: options.displaceScale,
+                displaceScaleTo: options.displaceScaleTo,
+                transitionMethod: LiquidSlider.slideTransitionAnimation,
+            };
+        }
+
+        protected getSlidesOptions(options: ISliderOptions, defaultSlide: ISlideOptions): { [key: string]: ISlideOptions } {
+            var slideOptions = <{ [key: string]: ISlideOptions }>{};
+            var givenOptions = options.slideOptions;
+
+            if (!givenOptions) return slideOptions;
+
+            for (let key in givenOptions) {
+                slideOptions[key] = <ISlideOptions>app.util.data.extend(true, {}, defaultSlide, givenOptions[key]);
+            }
+
+            return slideOptions;
         }
 
         protected initializePixi() {
@@ -160,14 +201,15 @@ namespace app.slider {
         protected querySprites(): string[] {
 
             var sprites: string[] = [];
-            const slides: { order: number, sprites: string[] }[] = [];
+            const slides: { order: number, optionKey: string, sprites: string[] }[] = [];
 
             this._element.querySelectorAll(this._options.slideSelector)
                 .forEach(el => {
-                    const slide: { order: number, sprites: string[] } =
-                        <{ order: number, sprites: string[] }>{};
+                    const slide: { order: number, optionKey: string, sprites: string[] } =
+                        <{ order: number, optionKey: string, sprites: string[] }>{};
 
                     slide.order = parseInt(getComputedStyle(el).getPropertyValue("--i"));
+                    slide.optionKey = el.getAttribute(SlideOptionKeyAttrName);
                     slide.sprites = [];
 
                     el.querySelectorAll(this._options.spriteSelector)
@@ -176,6 +218,10 @@ namespace app.slider {
                         });
 
                     slides.push(slide);
+
+                    if (slide.optionKey)
+                        this._slidesBinding[slide.order] = slide.optionKey;
+
                 });
 
             slides.sort((a, b) => {
@@ -293,8 +339,17 @@ namespace app.slider {
                     return;
                 }
 
-                // Default slide transition animation
-                LiquidSlider.slideTransitionAnimation(self, baseTimeline);
+                //Check for slide options
+                if (self._slidesBinding[self._currentSprite]) {
+                    const slideKey = this._slidesBinding[this._currentSprite];
+                    self._slidesOptions[slideKey].transitionMethod(self, baseTimeline);
+                } else {
+                    // Default slide transition animation
+                    self._defaultSlideOptions.transitionMethod(self, baseTimeline);
+                }
+
+
+                //LiquidSlider.slideTransitionAnimation(self, baseTimeline);
 
                 //baseTimeline
                 //    .to(self.displacementFilter().scale, 0.8, { x: self.displaceScale()[0], y: self.displaceScale()[1], ease: window.Power2.easeIn })
@@ -376,11 +431,21 @@ namespace app.slider {
         }
    
         public displaceScale(): [number, number] {
-            return this._options.displaceScale;
+            if (this._slidesBinding[this._currentSprite]) {
+                const key = this._slidesBinding[this._currentSprite];
+                return this._slidesOptions[key].displaceScale;
+            } 
+
+            return this._defaultSlideOptions.displaceScale;
         }
 
         public displaceScaleTo(): [number, number] {
-            return this._options.displaceScaleTo;
+            if (this._slidesBinding[this._currentSprite]) {
+                const key = this._slidesBinding[this._currentSprite];
+                return this._slidesOptions[key].displaceScaleTo;
+            }
+
+            return this._defaultSlideOptions.displaceScaleTo;
         }
 
         // *end*

@@ -11,6 +11,7 @@
     <Content Remove="wwwroot\js\media\camera.ts" />
     <Content Remove="wwwroot\js\media\declarations.ts" />
     <Content Remove="wwwroot\js\media\detector.ts" />
+    <Content Remove="wwwroot\js\slider\liquid-methods.ts" />
     <Content Remove="wwwroot\js\slider\liquid-slider.ts" />
     <Content Remove="wwwroot\js\typings\gsap-proxy.d.ts" />
     <Content Remove="wwwroot\js\typings\pixi.js.d.ts" />
@@ -44,6 +45,7 @@
     <TypeScriptCompile Include="wwwroot\js\media\camera.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\declarations.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\detector.ts" />
+    <TypeScriptCompile Include="wwwroot\js\slider\liquid-methods.ts" />
     <TypeScriptCompile Include="wwwroot\js\slider\liquid-slider.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\gsap-proxy.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\pixi.js.d.ts" />

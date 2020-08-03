@@ -17,6 +17,8 @@
 
     <script src="~/js/utils/util-data.js"></script>
     <script src="~/js/slider/liquid-slider.js"></script>
+    <script src="~/js/slider/liquid-methods.js"></script>
+
 }
 
 @section viewmenu {
@@ -85,6 +87,16 @@
                 <img class="surface" src="~/img/liquids/15.jpg" />
             </div>
         </div>
+        <div class="slide" style="--i:3" data-slide-options-key="calm-ripples">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/1.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:4" data-slide-options-key="calm-ripples">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/16.jpg" />
+            </div>
+        </div>
     </div>
 
 </div>
@@ -103,6 +115,12 @@
                     wacky: false,
                     autoPlaySpeed: [4, 3],
                     displaceScale: [5000, 10000],
+                    slideOptions: {
+                        "calm-ripples": {
+                            displaceScale: [200, 70],
+                            transitionMethod: app.slider.customization.calmRippleTransition,
+                        }
+                    }
                 });
     }
 
