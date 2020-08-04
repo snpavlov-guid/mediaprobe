@@ -126,7 +126,6 @@
             new app.slider.LiquidSlider(document.getElementById("liquid-slider"),
                 {
                     displacementImage: "@Url.Content("~/img/liquids/dmaps/2048x2048/clouds.jpg")",
-                    //displacementImage: "@Url.Content("~/img/liquids/dmaps/512x512/clouds.jpg")",
                     autoPlay: true,
                     centerSprites: false,
                     interactive: true,
@@ -144,8 +143,9 @@
                             transitionMethod: app.slider.customization.calmRippleTransition,
                         },
                         "grease-film": {
-                            autoPlaySpeed: [0.3, 0.3],
+                            autoPlaySpeed: [1.3, 1.3],
                             displaceScale: [800, 500],
+                            //displacementImage: "@Url.Content("~/img/liquids/dmaps/512x512/clouds.jpg")",
                             transitionMethod: app.slider.customization.greaseFilmTransition,
                         }
                     }

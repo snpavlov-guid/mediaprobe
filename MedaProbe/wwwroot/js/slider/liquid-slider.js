@@ -20,9 +20,13 @@ var app;
                 this._slidesOptions = this.getSlidesOptions(this._options, this._defaultSlideOptions);
                 this._slidesBinding = {};
                 this._currentSprite = 0;
+                this._currentFilter = "";
                 this.initializePixi();
+                //this._slidesFilters = this.initDisplacementFilters(this._slidesOptions, this._defaultSlideOptions);
                 this.initDisplacementFilter(this._displacementFilter, this._displacementSprite);
                 this.loadSlides(this.querySprites());
+                // set initial filter
+                //this._currentFilter = this.setFilter(this.slideOptions(0));
                 this.renderStage();
                 this.runSlider();
                 this.resizeSlider();
@@ -31,11 +35,21 @@ var app;
             sprites() {
                 return this._slidesContainer.children.length;
             }
+            slideOptions(pos) {
+                return this._slidesBinding[pos] ?
+                    this._slidesOptions[this._slidesBinding[pos]] :
+                    this._defaultSlideOptions;
+            }
             getDefaultSileOptions(options) {
                 return {
+                    wacky: options.wacky,
+                    autoPlay: options.autoPlay,
                     autoPlaySpeed: options.autoPlaySpeed,
                     displaceScale: options.displaceScale,
                     displaceScaleTo: options.displaceScaleTo,
+                    displacementImage: options.displacementImage,
+                    displaceAutoFit: options.displaceAutoFit,
+                    displacementImageScale: options.displacementImageScale,
                     transitionMethod: LiquidSlider.slideTransitionAnimation,
                 };
             }
@@ -73,6 +87,75 @@ var app;
                     fontSize: 14
                 });
             }
+            initDisplacementFilters(slidesOptions, defaultSlide) {
+                var filters = {};
+                var slides = [];
+                slides.push(defaultSlide);
+                for (let key in slidesOptions) {
+                    slides.push(slidesOptions[key]);
+                }
+                for (let i = 0; i < slides.length; i++) {
+                    const slide = slides[i];
+                    if (!slide.displacementImage)
+                        continue;
+                    if (filters[slide.displacementImage])
+                        continue;
+                    const displacementSprite = PIXI.Sprite.from(slide.displacementImage);
+                    displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+                    // add sprite
+                    this._stage.addChild(displacementSprite);
+                    const displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
+                    // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
+                    displacementFilter.autoFit = slide.displaceAutoFit;
+                    // init filter
+                    if (slide.autoPlay) {
+                        displacementFilter.scale.x = 0;
+                        displacementFilter.scale.y = 0;
+                    }
+                    if (slide.wacky) {
+                        displacementSprite.anchor.set(0.5);
+                        displacementSprite.x = this._renderer.width / 2;
+                        displacementSprite.y = this._renderer.height / 2;
+                    }
+                    displacementSprite.scale.x = slide.displacementImageScale[0];
+                    displacementSprite.scale.y = slide.displacementImageScale[1];
+                    // save filter data
+                    filters[slide.displacementImage] = {
+                        displacementSprite: displacementSprite,
+                        displacementFilter: displacementFilter,
+                    };
+                }
+                return filters;
+            }
+            setFilter(slide) {
+                var filter = this._slidesFilters[slide.displacementImage];
+                this._stage.filters = [filter.displacementFilter];
+                //this._stage.addChild(filter.displacementSprite);
+                this.setDisplacementFilter(slide, filter.displacementFilter, filter.displacementSprite);
+                return slide.displacementImage;
+            }
+            applyFilter(slide) {
+                if (this._currentFilter == slide.displacementImage)
+                    return slide.displacementImage;
+                //this._stage.removeChildAt(this._stage.children.length - 1);
+                return this.setFilter(slide);
+            }
+            setDisplacementFilter(slide, displacementFilter, displacementSprite) {
+                // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
+                displacementFilter.autoFit = slide.displaceAutoFit;
+                // init filter
+                if (slide.autoPlay) {
+                    displacementFilter.scale.x = 0;
+                    displacementFilter.scale.y = 0;
+                }
+                if (slide.wacky) {
+                    displacementSprite.anchor.set(0.5);
+                    displacementSprite.x = this._renderer.width / 2;
+                    displacementSprite.y = this._renderer.height / 2;
+                }
+                displacementSprite.scale.x = slide.displacementImageScale[0];
+                displacementSprite.scale.y = slide.displacementImageScale[1];
+            }
             initDisplacementFilter(filter, sprite) {
                 if (!this._options.autoPlay) {
                     filter.scale.x = 0;
@@ -83,8 +166,8 @@ var app;
                     sprite.x = this._renderer.width / 2;
                     sprite.y = this._renderer.height / 2;
                 }
-                sprite.scale.x = this._options.displacementImageScale;
-                sprite.scale.y = this._options.displacementImageScale;
+                sprite.scale.x = this._options.displacementImageScale[0];
+                sprite.scale.y = this._options.displacementImageScale[1];
                 // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
                 filter.autoFit = this._options.displaceAutoFit;
             }
@@ -140,26 +223,17 @@ var app;
             renderStage() {
                 const ticker = new PIXI.Ticker();
                 ticker.autoStart = true;
-                if (this._options.autoPlay) {
-                    ticker.add(delta => {
-                        this._displacementSprite.x += this.autoPlaySpeed()[0] * delta;
-                        this._displacementSprite.y += this.autoPlaySpeed()[1];
-                        this._renderer.render(this._stage);
-                    });
-                }
-                else {
-                    ticker.add(delta => {
-                        this._renderer.render(this._stage);
-                    });
-                }
+                ticker.add(delta => {
+                    if (this.autoPlay()) {
+                        this.displacementSprite().x += this.autoPlaySpeed()[0] * delta;
+                        this.displacementSprite().y += this.autoPlaySpeed()[1];
+                    }
+                    this._renderer.render(this._stage);
+                });
             }
             runSlider() {
                 setInterval(() => __awaiter(this, void 0, void 0, function* () {
-                    //const newIndex = (this._currentSprite + 1) % this.sprites();
                     yield this._slideTransition();
-                    //this._slidesContainer.children[this._currentSprite].alpha = 0;
-                    //this._currentSprite = (this._currentSprite + 1) % this.sprites();
-                    //this._slidesContainer.children[this._currentSprite].alpha = 1;
                 }), this._options.timeout);
             }
             _slideTransition() {
@@ -167,22 +241,22 @@ var app;
                     const self = this;
                     return yield new Promise((resolve, reject) => {
                         // Get slide options 
-                        var slideOprions = self._slidesBinding[self._currentSprite] ?
-                            self._slidesOptions[self._slidesBinding[self._currentSprite]] :
-                            self._defaultSlideOptions;
+                        var slideOprions = self.slideOptions(self._currentSprite);
                         const baseTimeline = new window.TimelineMax({
                             onComplete: function () {
-                                self._currentSprite = self.nextSlideIndex();
                                 if (self._options.wacky) {
                                     //self._displacementSprite.scale.set(1);
-                                    self._displacementSprite.scale.x = this._options.displacementImageScale;
-                                    self._displacementSprite.scale.y = this._options.displacementImageScale;
+                                    self.displacementSprite().scale.x = this.displacementImageScale().x;
+                                    self.displacementSprite().scale.y = this.displacementImageScale().y;
                                 }
+                                // move to the next slide index
+                                self._currentSprite = self.nextSlideIndex();
+                                // complete transition
                                 resolve();
                             }, onUpdate: function () {
                                 if (self._options.wacky) {
-                                    self._displacementSprite.rotation += baseTimeline.progress() * 0.02;
-                                    self._displacementSprite.scale.set(baseTimeline.progress() * 3);
+                                    self.displacementSprite().rotation += baseTimeline.progress() * 0.02;
+                                    self.displacementSprite().scale.set(baseTimeline.progress() * 3);
                                 }
                             }
                         });
@@ -236,29 +310,30 @@ var app;
             next() {
                 return this._slidesContainer.children[this.nextSlideIndex()];
             }
+            autoPlay() {
+                return this.slideOptions(this._currentSprite).autoPlay;
+            }
             displacementFilter() {
+                //let slide = this.slideOptions(this._currentSprite);
+                //return this._slidesFilters[slide.displacementImage].displacementFilter;
                 return this._displacementFilter;
             }
+            displacementSprite() {
+                //let slide = this.slideOptions(this._currentSprite);
+                //return this._slidesFilters[slide.displacementImage].displacementSprite;
+                return this._displacementSprite;
+            }
             autoPlaySpeed() {
-                if (this._slidesBinding[this._currentSprite]) {
-                    const key = this._slidesBinding[this._currentSprite];
-                    return this._slidesOptions[key].autoPlaySpeed;
-                }
-                return this._defaultSlideOptions.autoPlaySpeed;
+                return this.slideOptions(this._currentSprite).autoPlaySpeed;
             }
             displaceScale() {
-                if (this._slidesBinding[this._currentSprite]) {
-                    const key = this._slidesBinding[this._currentSprite];
-                    return this._slidesOptions[key].displaceScale;
-                }
-                return this._defaultSlideOptions.displaceScale;
+                return this.slideOptions(this._currentSprite).displaceScale;
             }
             displaceScaleTo() {
-                if (this._slidesBinding[this._currentSprite]) {
-                    const key = this._slidesBinding[this._currentSprite];
-                    return this._slidesOptions[key].displaceScaleTo;
-                }
-                return this._defaultSlideOptions.displaceScaleTo;
+                return this.slideOptions(this._currentSprite).displaceScaleTo;
+            }
+            displacementImageScale() {
+                return this.slideOptions(this._currentSprite).displacementImageScale;
             }
             // *end*
             // Default transition methods
@@ -282,7 +357,7 @@ var app;
             displaceScale: [200, 70],
             displaceScaleTo: [20, 20],
             displacementImage: "",
-            displacementImageScale: 2,
+            displacementImageScale: [2, 2],
             displacementCenter: false,
             displaceAutoFit: false,
             wacky: false,

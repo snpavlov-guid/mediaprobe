@@ -13,7 +13,7 @@ namespace app.slider {
         fullScreen: boolean,
         displaceScale: [number, number],
         displacementImage: string,
-        displacementImageScale: number,
+        displacementImageScale: [number, number],
         navElement: any,
         displaceAutoFit: boolean,
         wacky: boolean,
@@ -29,9 +29,14 @@ namespace app.slider {
     }
 
     export interface ISlideOptions {
+        wacky: boolean;
+        autoPlay: boolean,
         autoPlaySpeed: [number, number],
         displaceScale: [number, number],
         displaceScaleTo: [number, number],
+        displacementImage: string,
+        displaceAutoFit: boolean,
+        displacementImageScale: [number, number],
         transitionMethod(slide: ISlideProxy, baseTimeline: gsapProxy.TimelineMax);
     }
 
@@ -39,10 +44,19 @@ namespace app.slider {
         current(): PIXI.DisplayObject,
         item(index: number): PIXI.DisplayObject,
         next(): PIXI.DisplayObject,
+        autoPlay: () => boolean,
+        displacementSprite: () => PIXI.Sprite,
         displacementFilter: () => PIXI.filters.DisplacementFilter,
+        displacementImageScale: () => [number, number],
         autoPlaySpeed: () => [number, number],
         displaceScale: () => [number, number],
-        displaceScaleTo: () => [number, number]
+        displaceScaleTo: () => [number, number],
+      
+    }
+
+    export interface IFilterProxy {
+        displacementSprite: PIXI.Sprite;
+        displacementFilter: PIXI.filters.DisplacementFilter;
     }
 
     const SlideOptionKeyAttrName: string = "data-slide-options-key";
@@ -51,10 +65,12 @@ namespace app.slider {
 
         private _options: ISliderOptions;
         private _defaultSlideOptions: ISlideOptions;
-        private _slidesOptions: { [key: string]: ISlideOptions };
         private _slidesBinding: { [key: number]: string };
+        private _slidesOptions: { [key: string]: ISlideOptions };
+        private _slidesFilters: { [key: string]: IFilterProxy };
 
         private _currentSprite: number;
+        private _currentFilter: string;
 
         private _element: HTMLElement;
         private _renderer: PIXI.Renderer;
@@ -78,7 +94,7 @@ namespace app.slider {
             displaceScale: [200, 70],
             displaceScaleTo: [20, 20],
             displacementImage: "",
-            displacementImageScale: 2,
+            displacementImageScale: [2, 2],
             displacementCenter: false,
             displaceAutoFit: false,
             wacky: false,
@@ -101,11 +117,18 @@ namespace app.slider {
 
             this._currentSprite = 0;
 
+            this._currentFilter = "";
+
             this.initializePixi();
+
+            //this._slidesFilters = this.initDisplacementFilters(this._slidesOptions, this._defaultSlideOptions);
 
             this.initDisplacementFilter(this._displacementFilter, this._displacementSprite);
 
             this.loadSlides(this.querySprites());
+
+            // set initial filter
+            //this._currentFilter = this.setFilter(this.slideOptions(0));
 
             this.renderStage();
 
@@ -121,11 +144,22 @@ namespace app.slider {
             return this._slidesContainer.children.length;
         }
 
+        protected slideOptions(pos: number): ISlideOptions {
+            return this._slidesBinding[pos] ?
+                this._slidesOptions[this._slidesBinding[pos]] :
+                this._defaultSlideOptions;
+        }
+
         protected getDefaultSileOptions(options : ISliderOptions): ISlideOptions {
             return <ISlideOptions>{
+                wacky: options.wacky,
+                autoPlay: options.autoPlay,
                 autoPlaySpeed: options.autoPlaySpeed,
                 displaceScale: options.displaceScale,
                 displaceScaleTo: options.displaceScaleTo,
+                displacementImage: options.displacementImage,
+                displaceAutoFit: options.displaceAutoFit,
+                displacementImageScale: options.displacementImageScale,
                 transitionMethod: LiquidSlider.slideTransitionAnimation,
             };
         }
@@ -178,6 +212,107 @@ namespace app.slider {
 
         }
 
+        protected initDisplacementFilters(slidesOptions: { [key: string]: ISlideOptions }, defaultSlide: ISlideOptions) :
+                { [key: string]: IFilterProxy } {
+            var filters = <{ [key: string]: IFilterProxy }>{};
+            var slides: ISlideOptions[] = [];
+
+            slides.push(defaultSlide);
+
+            for (let key in slidesOptions) {
+                slides.push(slidesOptions[key]);
+            }
+
+            for (let i = 0; i < slides.length; i++) {
+                const slide = slides[i];
+
+                if (!slide.displacementImage) continue;
+
+                if (filters[slide.displacementImage]) continue;
+
+                const displacementSprite = PIXI.Sprite.from(slide.displacementImage);
+                displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+
+                // add sprite
+                this._stage.addChild(displacementSprite);
+
+                const displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
+
+                // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
+                displacementFilter.autoFit = slide.displaceAutoFit;
+
+                // init filter
+                if (slide.autoPlay) {
+                    displacementFilter.scale.x = 0;
+                    displacementFilter.scale.y = 0;
+                }
+
+                if (slide.wacky) {
+                    displacementSprite.anchor.set(0.5);
+                    displacementSprite.x = this._renderer.width / 2;
+                    displacementSprite.y = this._renderer.height / 2;
+                }
+
+                displacementSprite.scale.x = slide.displacementImageScale[0];
+                displacementSprite.scale.y = slide.displacementImageScale[1];
+
+                // save filter data
+                filters[slide.displacementImage] = <IFilterProxy>{
+                    displacementSprite: displacementSprite,
+                    displacementFilter: displacementFilter,
+                };
+
+            }
+
+            return filters;
+        }
+
+        protected setFilter(slide: ISlideOptions) : string {
+
+            var filter = this._slidesFilters[slide.displacementImage];
+
+            this._stage.filters = [filter.displacementFilter];
+            //this._stage.addChild(filter.displacementSprite);
+
+            this.setDisplacementFilter(slide, filter.displacementFilter, filter.displacementSprite);
+
+            return slide.displacementImage;
+        }
+
+        protected applyFilter(slide: ISlideOptions): string {
+
+            if (this._currentFilter == slide.displacementImage)
+                return slide.displacementImage;
+
+            //this._stage.removeChildAt(this._stage.children.length - 1);
+
+            return this.setFilter(slide);
+
+        }
+
+        protected setDisplacementFilter(slide: ISlideOptions,
+            displacementFilter: PIXI.filters.DisplacementFilter, displacementSprite: PIXI.Sprite) {
+
+            // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
+            displacementFilter.autoFit = slide.displaceAutoFit;
+
+            // init filter
+            if (slide.autoPlay) {
+                displacementFilter.scale.x = 0;
+                displacementFilter.scale.y = 0;
+            }
+
+            if (slide.wacky) {
+                displacementSprite.anchor.set(0.5);
+                displacementSprite.x = this._renderer.width / 2;
+                displacementSprite.y = this._renderer.height / 2;
+            }
+
+            displacementSprite.scale.x = slide.displacementImageScale[0];
+            displacementSprite.scale.y = slide.displacementImageScale[1];
+
+        }
+
         protected initDisplacementFilter(
             filter: PIXI.filters.DisplacementFilter, sprite: PIXI.Sprite) {
 
@@ -192,8 +327,8 @@ namespace app.slider {
                 sprite.y = this._renderer.height / 2;
             }
 
-            sprite.scale.x = this._options.displacementImageScale;
-            sprite.scale.y = this._options.displacementImageScale;
+            sprite.scale.x = this._options.displacementImageScale[0];
+            sprite.scale.y = this._options.displacementImageScale[1];
 
             // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
             filter.autoFit = this._options.displaceAutoFit;
@@ -263,7 +398,6 @@ namespace app.slider {
                     image.y = this._renderer.height / 2;
                 }
 
-
                 this._slidesContainer.addChild(image);
 
             }
@@ -276,24 +410,16 @@ namespace app.slider {
 
             ticker.autoStart = true;
 
-            if (this._options.autoPlay) {
+            ticker.add(delta => {
 
-                ticker.add(delta => {
+                if (this.autoPlay()) {
+                    this.displacementSprite().x += this.autoPlaySpeed()[0] * delta;
+                    this.displacementSprite().y += this.autoPlaySpeed()[1];
+                }
 
-                    this._displacementSprite.x += this.autoPlaySpeed()[0] * delta;
-                    this._displacementSprite.y += this.autoPlaySpeed()[1];
+                this._renderer.render(this._stage);
 
-                    this._renderer.render(this._stage);
-
-                });
-
-            } else {
-
-                ticker.add(delta => {
-                    this._renderer.render(this._stage);
-                });
-
-            }
+            });
 
         }
 
@@ -301,16 +427,7 @@ namespace app.slider {
 
             setInterval(async () => {
 
-                //const newIndex = (this._currentSprite + 1) % this.sprites();
-
                 await this._slideTransition();
-
-                //this._slidesContainer.children[this._currentSprite].alpha = 0;
-
-                //this._currentSprite = (this._currentSprite + 1) % this.sprites();
-
-                //this._slidesContainer.children[this._currentSprite].alpha = 1;
-             
 
             }, this._options.timeout);
         }
@@ -321,28 +438,29 @@ namespace app.slider {
             return await new Promise<void>((resolve, reject) => {
 
                // Get slide options 
-               var slideOprions: ISlideOptions = self._slidesBinding[self._currentSprite] ?
-                    self._slidesOptions[self._slidesBinding[self._currentSprite]] :
-                    self._defaultSlideOptions;
-
+               var slideOprions = self.slideOptions(self._currentSprite);
+  
                const baseTimeline = new window.TimelineMax({
-                    onComplete: function () {
+                   onComplete: function () {
 
-                        self._currentSprite = self.nextSlideIndex();
+                       if (self._options.wacky) {
+                           //self._displacementSprite.scale.set(1);
+                           self.displacementSprite().scale.x = this.displacementImageScale().x;
+                           self.displacementSprite().scale.y = this.displacementImageScale().y;
+                       }    
 
-                        if (self._options.wacky) {
-                            //self._displacementSprite.scale.set(1);
-                            self._displacementSprite.scale.x = this._options.displacementImageScale;
-                            self._displacementSprite.scale.y = this._options.displacementImageScale;
-                        }          
+                       // move to the next slide index
+                       self._currentSprite = self.nextSlideIndex();
 
-                        resolve();
+                       // complete transition
+                       resolve();
+
 
                     }, onUpdate: function () {
 
                         if (self._options.wacky) {
-                            self._displacementSprite.rotation += baseTimeline.progress() * 0.02;
-                            self._displacementSprite.scale.set(baseTimeline.progress() * 3);
+                            self.displacementSprite().rotation += baseTimeline.progress() * 0.02;
+                            self.displacementSprite().scale.set(baseTimeline.progress() * 3);
                         }          
                     }
                 });
@@ -425,35 +543,38 @@ namespace app.slider {
             return this._slidesContainer.children[this.nextSlideIndex()];
         }
 
+        public autoPlay(): boolean {
+            return this.slideOptions(this._currentSprite).autoPlay;
+        }
+
         public displacementFilter(): PIXI.filters.DisplacementFilter {
+            //let slide = this.slideOptions(this._currentSprite);
+            //return this._slidesFilters[slide.displacementImage].displacementFilter;
+
             return this._displacementFilter;
         }
 
-        public autoPlaySpeed(): [number, number] {
-            if (this._slidesBinding[this._currentSprite]) {
-                const key = this._slidesBinding[this._currentSprite];
-                return this._slidesOptions[key].autoPlaySpeed;
-            }
+        public displacementSprite(): PIXI.Sprite {
+            //let slide = this.slideOptions(this._currentSprite);
+            //return this._slidesFilters[slide.displacementImage].displacementSprite;
 
-            return this._defaultSlideOptions.autoPlaySpeed;
+            return this._displacementSprite;
+        }
+
+        public autoPlaySpeed(): [number, number] {
+            return this.slideOptions(this._currentSprite).autoPlaySpeed;
         }
    
         public displaceScale(): [number, number] {
-            if (this._slidesBinding[this._currentSprite]) {
-                const key = this._slidesBinding[this._currentSprite];
-                return this._slidesOptions[key].displaceScale;
-            } 
-
-            return this._defaultSlideOptions.displaceScale;
+            return this.slideOptions(this._currentSprite).displaceScale;
         }
 
         public displaceScaleTo(): [number, number] {
-            if (this._slidesBinding[this._currentSprite]) {
-                const key = this._slidesBinding[this._currentSprite];
-                return this._slidesOptions[key].displaceScaleTo;
-            }
+            return this.slideOptions(this._currentSprite).displaceScaleTo;
+        }
 
-            return this._defaultSlideOptions.displaceScaleTo;
+        public displacementImageScale(): [number, number] {
+            return this.slideOptions(this._currentSprite).displacementImageScale;
         }
 
         // *end*
