@@ -72,21 +72,22 @@
 <div class="holder">
 
     <div id="liquid-slider" class="wiper">
-        <div class="slide" style="--i:0">
+        <div class="slide" style="--i:0" data-slide-options-key="gooey-ripples" >
             <div class="content">
                 <img class="surface" src="~/img/liquids/13.jpg" />
             </div>
         </div>
-        <div class="slide" style="--i:1">
+        <div class="slide" style="--i:1" data-slide-options-key="gooey-ripples">
             <div class="content">
                 <img class="surface" src="~/img/liquids/2.jpg" />
             </div>
         </div>
-        <div class="slide" style="--i:2">
+        <div class="slide" style="--i:2" data-slide-options-key="gooey-ripples">
             <div class="content">
                 <img class="surface" src="~/img/liquids/15.jpg" />
             </div>
         </div>
+
         <div class="slide" style="--i:3" data-slide-options-key="calm-ripples">
             <div class="content">
                 <img class="surface" src="~/img/liquids/1.jpg" />
@@ -95,6 +96,22 @@
         <div class="slide" style="--i:4" data-slide-options-key="calm-ripples">
             <div class="content">
                 <img class="surface" src="~/img/liquids/16.jpg" />
+            </div>
+        </div>
+
+        <div class="slide" style="--i:5" data-slide-options-key="grease-film">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/4.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:6" data-slide-options-key="grease-film">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/4.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:7" data-slide-options-key="grease-film">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/6.jpg" />
             </div>
         </div>
     </div>
@@ -109,14 +126,20 @@
             new app.slider.LiquidSlider(document.getElementById("liquid-slider"),
                 {
                     displacementImage: "@Url.Content("~/img/liquids/dmaps/2048x2048/clouds.jpg")",
+                    //displacementImage: "@Url.Content("~/img/liquids/dmaps/512x512/clouds.jpg")",
                     autoPlay: true,
                     centerSprites: false,
                     interactive: true,
                     wacky: false,
-                    autoPlaySpeed: [4, 3],
-                    displaceScale: [5000, 10000],
+                    displaceAutoFit: false,
                     slideOptions: {
+                        "gooey-ripples": {
+                            autoPlaySpeed: [4, 3],
+                            displaceScale: [5000, 10000],
+                            transitionMethod: app.slider.customization.gooeyRipplesTransition,
+                        },
                         "calm-ripples": {
+                            autoPlaySpeed: [10, 3],
                             displaceScale: [200, 70],
                             transitionMethod: app.slider.customization.calmRippleTransition,
                         },

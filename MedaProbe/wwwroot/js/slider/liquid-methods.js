@@ -4,6 +4,14 @@ var app;
     (function (slider) {
         var customization;
         (function (customization) {
+            function gooeyRipplesTransition(slide, baseTimeline) {
+                baseTimeline
+                    .to(slide.displacementFilter().scale, 0.8, { x: slide.displaceScale()[0], y: slide.displaceScale()[1], ease: window.Power2.easeIn })
+                    .to(slide.current(), 0.5, { alpha: 0, ease: window.Power2.easeOut }, 0.4)
+                    .to(slide.next(), 0.8, { alpha: 1, ease: window.Power2.easeOut }, 1)
+                    .to(slide.displacementFilter().scale, 0.7, { x: slide.displaceScaleTo()[0], y: slide.displaceScaleTo()[1], ease: window.Power1.easeOut }, 0.9);
+            }
+            customization.gooeyRipplesTransition = gooeyRipplesTransition;
             function calmRippleTransition(slide, baseTimeline) {
                 baseTimeline
                     .to(slide.displacementFilter().scale, 1, { x: slide.displaceScale()[0], y: slide.displaceScale()[1] })

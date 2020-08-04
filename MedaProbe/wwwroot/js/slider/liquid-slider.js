@@ -86,7 +86,7 @@ var app;
                 sprite.scale.x = this._options.displacementImageScale;
                 sprite.scale.y = this._options.displacementImageScale;
                 // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
-                //filter.autoFit = this._options.displaceAutoFit;
+                filter.autoFit = this._options.displaceAutoFit;
             }
             querySprites() {
                 var sprites = [];
@@ -102,8 +102,6 @@ var app;
                         slide.sprites.push(spi.src);
                     });
                     slides.push(slide);
-                    if (slide.optionKey)
-                        this._slidesBinding[slide.order] = slide.optionKey;
                 });
                 slides.sort((a, b) => {
                     if (a.order > b.order)
@@ -112,8 +110,15 @@ var app;
                         return -1;
                     return 0;
                 });
+                let curpos = 0;
                 slides.forEach(el => {
                     sprites = sprites.concat(el.sprites);
+                    if (el.optionKey) {
+                        for (let i = curpos; i < sprites.length; i++) {
+                            this._slidesBinding[i] = el.optionKey;
+                        }
+                    }
+                    curpos += el.sprites.length;
                 });
                 return sprites;
             }
@@ -161,6 +166,10 @@ var app;
                 return __awaiter(this, void 0, void 0, function* () {
                     const self = this;
                     return yield new Promise((resolve, reject) => {
+                        // Get slide options 
+                        var slideOprions = self._slidesBinding[self._currentSprite] ?
+                            self._slidesOptions[self._slidesBinding[self._currentSprite]] :
+                            self._defaultSlideOptions;
                         const baseTimeline = new window.TimelineMax({
                             onComplete: function () {
                                 self._currentSprite = self.nextSlideIndex();
@@ -181,21 +190,8 @@ var app;
                         if (baseTimeline.isActive()) {
                             return;
                         }
-                        //Check for slide options
-                        if (self._slidesBinding[self._currentSprite]) {
-                            const slideKey = this._slidesBinding[this._currentSprite];
-                            self._slidesOptions[slideKey].transitionMethod(self, baseTimeline);
-                        }
-                        else {
-                            // Default slide transition animation
-                            self._defaultSlideOptions.transitionMethod(self, baseTimeline);
-                        }
-                        //LiquidSlider.slideTransitionAnimation(self, baseTimeline);
-                        //baseTimeline
-                        //    .to(self.displacementFilter().scale, 0.8, { x: self.displaceScale()[0], y: self.displaceScale()[1], ease: window.Power2.easeIn })
-                        //    .to(self.current(), 0.5, { alpha: 0, ease: window.Power2.easeOut }, 0.4)
-                        //    .to(self.next(), 0.8, { alpha: 1, ease: window.Power2.easeOut }, 1)
-                        //    .to(self.displacementFilter().scale, 0.7, { x: self.displaceScaleTo()[0], y: self.displaceScaleTo()[1], ease: window.Power1.easeOut }, 0.9);
+                        // Call slide transition method 
+                        slideOprions.transitionMethod(self, baseTimeline);
                     });
                 });
             }
@@ -287,6 +283,7 @@ var app;
             displaceScaleTo: [20, 20],
             displacementImage: "",
             displacementImageScale: 2,
+            displacementCenter: false,
             displaceAutoFit: false,
             wacky: false,
             interactive: false,
