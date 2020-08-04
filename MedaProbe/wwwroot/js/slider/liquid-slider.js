@@ -20,13 +20,12 @@ var app;
                 this._slidesOptions = this.getSlidesOptions(this._options, this._defaultSlideOptions);
                 this._slidesBinding = {};
                 this._currentSprite = 0;
-                this._currentFilter = "";
                 this.initializePixi();
-                //this._slidesFilters = this.initDisplacementFilters(this._slidesOptions, this._defaultSlideOptions);
-                this.initDisplacementFilter(this._displacementFilter, this._displacementSprite);
+                this._slidesFilters = this.initDisplacementFilters(this._slidesOptions, this._defaultSlideOptions);
+                //this.initDisplacementFilter(this._displacementFilter, this._displacementSprite);
                 this.loadSlides(this.querySprites());
                 // set initial filter
-                //this._currentFilter = this.setFilter(this.slideOptions(0));
+                this._currentFilter = this.setFilter(this.slideOptions(0));
                 this.renderStage();
                 this.runSlider();
                 this.resizeSlider();
@@ -74,11 +73,11 @@ var app;
                 this._stage.interactive = true; // LOOK IT!
                 this._slidesContainer = new PIXI.Container();
                 this._stage.addChild(this._slidesContainer); // Add child container to the main container 
-                this._displacementSprite = PIXI.Sprite.from(this._options.displacementImage);
-                this._displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
-                this._displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite);
-                this._stage.filters = [this._displacementFilter];
-                this._stage.addChild(this._displacementSprite);
+                //this._displacementSprite = PIXI.Sprite.from(this._options.displacementImage);
+                //this._displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+                //this._displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite);
+                //this._stage.filters = [this._displacementFilter];
+                //this._stage.addChild(this._displacementSprite);
                 this._textStyle = new PIXI.TextStyle({
                     fill: this._options.textColor,
                     wordWrap: true,
@@ -100,15 +99,16 @@ var app;
                         continue;
                     if (filters[slide.displacementImage])
                         continue;
-                    const displacementSprite = PIXI.Sprite.from(slide.displacementImage);
+                    // prepare displacement filter
+                    var displacementSprite = PIXI.Sprite.from(slide.displacementImage);
                     displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+                    var displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
                     // add sprite
                     this._stage.addChild(displacementSprite);
-                    const displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
                     // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
                     displacementFilter.autoFit = slide.displaceAutoFit;
                     // init filter
-                    if (slide.autoPlay) {
+                    if (!slide.autoPlay) {
                         displacementFilter.scale.x = 0;
                         displacementFilter.scale.y = 0;
                     }
@@ -130,21 +130,18 @@ var app;
             setFilter(slide) {
                 var filter = this._slidesFilters[slide.displacementImage];
                 this._stage.filters = [filter.displacementFilter];
-                //this._stage.addChild(filter.displacementSprite);
-                this.setDisplacementFilter(slide, filter.displacementFilter, filter.displacementSprite);
                 return slide.displacementImage;
             }
             applyFilter(slide) {
                 if (this._currentFilter == slide.displacementImage)
                     return slide.displacementImage;
-                //this._stage.removeChildAt(this._stage.children.length - 1);
                 return this.setFilter(slide);
             }
             setDisplacementFilter(slide, displacementFilter, displacementSprite) {
                 // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
                 displacementFilter.autoFit = slide.displaceAutoFit;
                 // init filter
-                if (slide.autoPlay) {
+                if (!slide.autoPlay) {
                     displacementFilter.scale.x = 0;
                     displacementFilter.scale.y = 0;
                 }
@@ -244,17 +241,19 @@ var app;
                         var slideOprions = self.slideOptions(self._currentSprite);
                         const baseTimeline = new window.TimelineMax({
                             onComplete: function () {
-                                if (self._options.wacky) {
+                                if (slideOprions.wacky) {
                                     //self._displacementSprite.scale.set(1);
                                     self.displacementSprite().scale.x = this.displacementImageScale().x;
                                     self.displacementSprite().scale.y = this.displacementImageScale().y;
                                 }
                                 // move to the next slide index
                                 self._currentSprite = self.nextSlideIndex();
+                                // apply slide filter
+                                self._currentFilter = self.applyFilter(self.slideOptions(self._currentSprite));
                                 // complete transition
                                 resolve();
                             }, onUpdate: function () {
-                                if (self._options.wacky) {
+                                if (slideOprions.wacky) {
                                     self.displacementSprite().rotation += baseTimeline.progress() * 0.02;
                                     self.displacementSprite().scale.set(baseTimeline.progress() * 3);
                                 }
@@ -314,14 +313,14 @@ var app;
                 return this.slideOptions(this._currentSprite).autoPlay;
             }
             displacementFilter() {
-                //let slide = this.slideOptions(this._currentSprite);
-                //return this._slidesFilters[slide.displacementImage].displacementFilter;
-                return this._displacementFilter;
+                let slide = this.slideOptions(this._currentSprite);
+                return this._slidesFilters[slide.displacementImage].displacementFilter;
+                //return this._displacementFilter;
             }
             displacementSprite() {
-                //let slide = this.slideOptions(this._currentSprite);
-                //return this._slidesFilters[slide.displacementImage].displacementSprite;
-                return this._displacementSprite;
+                let slide = this.slideOptions(this._currentSprite);
+                return this._slidesFilters[slide.displacementImage].displacementSprite;
+                //return this._displacementSprite;
             }
             autoPlaySpeed() {
                 return this.slideOptions(this._currentSprite).autoPlaySpeed;
