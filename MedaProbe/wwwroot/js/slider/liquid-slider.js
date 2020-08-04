@@ -242,9 +242,9 @@ var app;
                         const baseTimeline = new window.TimelineMax({
                             onComplete: function () {
                                 if (slideOprions.wacky) {
-                                    //self._displacementSprite.scale.set(1);
-                                    self.displacementSprite().scale.x = this.displacementImageScale().x;
-                                    self.displacementSprite().scale.y = this.displacementImageScale().y;
+                                    self.displacementFilter().scale.set(1);
+                                    self.displacementSprite().scale.x = self.displacementImageScale()[0];
+                                    self.displacementSprite().scale.y = self.displacementImageScale()[1];
                                 }
                                 // move to the next slide index
                                 self._currentSprite = self.nextSlideIndex();

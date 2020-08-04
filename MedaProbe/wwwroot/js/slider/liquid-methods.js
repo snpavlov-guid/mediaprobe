@@ -28,6 +28,14 @@ var app;
                     .to(slide.displacementFilter().scale, 1.5, { x: slide.displaceScaleTo()[0], y: slide.displaceScaleTo()[1], ease: window.Expo.easeOut }, 0.8);
             }
             customization.greaseFilmTransition = greaseFilmTransition;
+            function crystalizeTransition(slide, baseTimeline) {
+                baseTimeline
+                    .to(slide.displacementFilter().scale, 1, { x: slide.displaceScale()[0], y: slide.displaceScale()[1], ease: window.Power1.easeOut })
+                    .to(slide.current(), 0.5, { alpha: 0, ease: window.Power2.easeOut }, 0.2)
+                    .to(slide.next(), 0.5, { alpha: 1, ease: window.Power2.easeOut }, 0.3)
+                    .to(slide.displacementFilter().scale, 1, { x: slide.displaceScaleTo()[0], y: slide.displaceScaleTo()[1], ease: window.Power2.easeOut }, 0.3);
+            }
+            customization.crystalizeTransition = crystalizeTransition;
         })(customization = slider.customization || (slider.customization = {}));
     })(slider = app.slider || (app.slider = {}));
 })(app || (app = {}));

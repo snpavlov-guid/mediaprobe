@@ -72,7 +72,7 @@
 <div class="holder">
 
     <div id="liquid-slider" class="wiper">
-        <div class="slide" style="--i:0" data-slide-options-key="gooey-ripples" >
+        <div class="slide" style="--i:0" data-slide-options-key="gooey-ripples">
             <div class="content">
                 <img class="surface" src="~/img/liquids/13.jpg" />
             </div>
@@ -106,12 +106,28 @@
         </div>
         <div class="slide" style="--i:6" data-slide-options-key="grease-film">
             <div class="content">
-                <img class="surface" src="~/img/liquids/4.jpg" />
+                <img class="surface" src="~/img/liquids/5.jpg" />
             </div>
         </div>
         <div class="slide" style="--i:7" data-slide-options-key="grease-film">
             <div class="content">
                 <img class="surface" src="~/img/liquids/6.jpg" />
+            </div>
+        </div>
+
+        <div class="slide" style="--i:8" data-slide-options-key="crystalize">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/7.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:9" data-slide-options-key="crystalize">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/8.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:10" data-slide-options-key="crystalize">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/9.jpg" />
             </div>
         </div>
     </div>
@@ -147,6 +163,14 @@
                             displaceScale: [800, 500],
                             displacementImage: "@Url.Content("~/img/liquids/dmaps/512x512/clouds.jpg")",
                             transitionMethod: app.slider.customization.greaseFilmTransition,
+                        },
+                        "crystalize": {
+                            autoPlay: false,
+                            displaceScale: [300, 300],
+                            //displaceScaleTo: [1, 1],
+                            displacementImage: "@Url.Content("~/img/liquids/dmaps/512x512/crystalize.jpg")", 
+                            transitionMethod: app.slider.customization.crystalizeTransition,
+                            wacky: true,
                         }
                     }
                 });
