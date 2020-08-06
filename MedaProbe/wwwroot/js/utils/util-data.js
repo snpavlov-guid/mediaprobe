@@ -13,7 +13,9 @@ var app;
                     for (var key in obj) {
                         if (obj.hasOwnProperty(key)) {
                             if (deep && typeof obj[key] === 'object') {
-                                if (obj[key] instanceof Array == true)
+                                if (obj[key] == null)
+                                    out[key] = obj[key];
+                                else if (obj[key] instanceof Array == true)
                                     out[key] = obj[key].slice(0);
                                 else
                                     out[key] = extend(deep, out[key], obj[key]);

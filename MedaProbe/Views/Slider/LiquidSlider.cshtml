@@ -130,6 +130,28 @@
                 <img class="surface" src="~/img/liquids/9.jpg" />
             </div>
         </div>
+
+        <div class="slide" style="--i:11" data-slide-options-key="nervous-behavior">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/10.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:12" data-slide-options-key="nervous-behavior">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/11.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:13" data-slide-options-key="nervous-behavior">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/12.jpg" />
+            </div>
+        </div>
+        <div class="slide" style="--i:14" data-slide-options-key="nervous-behavior">
+            <div class="content">
+                <img class="surface" src="~/img/liquids/17.jpg" />
+            </div>
+        </div>
+
     </div>
 
 </div>
@@ -168,9 +190,16 @@
                             autoPlay: false,
                             displaceScale: [300, 300],
                             //displaceScaleTo: [1, 1],
-                            displacementImage: "@Url.Content("~/img/liquids/dmaps/512x512/crystalize.jpg")", 
+                            displacementImage: "@Url.Content("~/img/liquids/dmaps/512x512/crystalize.jpg")",
                             transitionMethod: app.slider.customization.crystalizeTransition,
                             wacky: true,
+                        },
+                        "nervous-behavior": {
+                            autoPlaySpeed: [0.1, 0.1],
+                            displacementImage: "@Url.Content("~/img/liquids/dmaps/2048x2048/ripple.jpg")",
+                            transitionMethod: app.slider.customization.nervousBreakdownTransition,
+                            transitionTickMethod: app.slider.customization.nervousTremorRender,
+                            renderTickMethod: app.slider.customization.nervousTremorRender,
                         }
                     }
                 });

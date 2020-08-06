@@ -13,6 +13,9 @@ namespace app.util.data {
                 if (obj.hasOwnProperty(key)) {
 
                     if (deep && typeof obj[key] === 'object') {
+                        if (obj[key] == null)
+                            out[key] = obj[key];
+                        else
                         if (obj[key] instanceof Array == true)
                             out[key] = obj[key].slice(0);
                         else

@@ -38,6 +38,8 @@ namespace app.slider {
         displaceAutoFit: boolean,
         displacementImageScale: [number, number],
         transitionMethod(slide: ISlideProxy, baseTimeline: gsapProxy.TimelineMax);
+        transitionTickMethod(slide: ISlideProxy, delta: number);
+        renderTickMethod(slide: ISlideProxy, delta: number);
     }
 
     export interface ISlideProxy {
@@ -51,6 +53,7 @@ namespace app.slider {
         autoPlaySpeed: () => [number, number],
         displaceScale: () => [number, number],
         displaceScaleTo: () => [number, number],
+        renderTick(delta: number) : void;
       
     }
 
@@ -76,6 +79,7 @@ namespace app.slider {
         private _renderer: PIXI.Renderer;
         private _stage: PIXI.Container;
         private _slidesContainer: PIXI.Container;
+        private _transitionTicker: PIXI.Ticker;
         private _displacementSprite: PIXI.Sprite;
         private _displacementFilter: PIXI.filters.DisplacementFilter;
         private _textStyle;
@@ -159,6 +163,8 @@ namespace app.slider {
                 displaceAutoFit: options.displaceAutoFit,
                 displacementImageScale: options.displacementImageScale,
                 transitionMethod: LiquidSlider.slideTransitionAnimation,
+                transitionTickMethod: null,
+                renderTickMethod: null,
             };
         }
 
@@ -198,6 +204,15 @@ namespace app.slider {
 
             //this._stage.filters = [this._displacementFilter];
             //this._stage.addChild(this._displacementSprite);
+
+            this._transitionTicker = new PIXI.Ticker();
+            this._transitionTicker.autoStart = false;
+
+            this._transitionTicker.add((delta) => {
+                const slideOptions = this.slideOptions(this._currentSprite);
+                if (!slideOptions.transitionTickMethod) return;
+                slideOptions.transitionTickMethod(this, delta);
+            });
 
             this._textStyle = new PIXI.TextStyle({
                 fill: this._options.textColor,
@@ -408,8 +423,11 @@ namespace app.slider {
             ticker.add(delta => {
 
                 if (this.autoPlay()) {
+
                     this.displacementSprite().x += this.autoPlaySpeed()[0] * delta;
                     this.displacementSprite().y += this.autoPlaySpeed()[1];
+
+                    this.renderTick(delta);
                 }
 
                 this._renderer.render(this._stage);
@@ -433,10 +451,18 @@ namespace app.slider {
             return await new Promise<void>((resolve, reject) => {
 
                // Get slide options 
-               var slideOprions = self.slideOptions(self._currentSprite);
+               const slideOprions = self.slideOptions(self._currentSprite);
+
+                if (slideOprions.transitionTickMethod) {
+                    self._transitionTicker.start();
+                }
   
                const baseTimeline = new window.TimelineMax({
                    onComplete: function () {
+
+                       if (slideOprions.transitionTickMethod) {
+                           self._transitionTicker.stop();
+                       }
 
                        if (slideOprions.wacky) {
                            self.displacementFilter().scale.set(1);
@@ -573,6 +599,11 @@ namespace app.slider {
 
         public displacementImageScale(): [number, number] {
             return this.slideOptions(this._currentSprite).displacementImageScale;
+        }
+
+        public renderTick(delta: number) {
+            const slide = this.slideOptions(this._currentSprite);
+            if (slide.renderTickMethod) slide.renderTickMethod(this, delta);
         }
 
         // *end*

@@ -50,6 +50,8 @@ var app;
                     displaceAutoFit: options.displaceAutoFit,
                     displacementImageScale: options.displacementImageScale,
                     transitionMethod: LiquidSlider.slideTransitionAnimation,
+                    transitionTickMethod: null,
+                    renderTickMethod: null,
                 };
             }
             getSlidesOptions(options, defaultSlide) {
@@ -78,6 +80,14 @@ var app;
                 //this._displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite);
                 //this._stage.filters = [this._displacementFilter];
                 //this._stage.addChild(this._displacementSprite);
+                this._transitionTicker = new PIXI.Ticker();
+                this._transitionTicker.autoStart = false;
+                this._transitionTicker.add((delta) => {
+                    const slideOptions = this.slideOptions(this._currentSprite);
+                    if (!slideOptions.transitionTickMethod)
+                        return;
+                    slideOptions.transitionTickMethod(this, delta);
+                });
                 this._textStyle = new PIXI.TextStyle({
                     fill: this._options.textColor,
                     wordWrap: true,
@@ -224,6 +234,7 @@ var app;
                     if (this.autoPlay()) {
                         this.displacementSprite().x += this.autoPlaySpeed()[0] * delta;
                         this.displacementSprite().y += this.autoPlaySpeed()[1];
+                        this.renderTick(delta);
                     }
                     this._renderer.render(this._stage);
                 });
@@ -238,9 +249,15 @@ var app;
                     const self = this;
                     return yield new Promise((resolve, reject) => {
                         // Get slide options 
-                        var slideOprions = self.slideOptions(self._currentSprite);
+                        const slideOprions = self.slideOptions(self._currentSprite);
+                        if (slideOprions.transitionTickMethod) {
+                            self._transitionTicker.start();
+                        }
                         const baseTimeline = new window.TimelineMax({
                             onComplete: function () {
+                                if (slideOprions.transitionTickMethod) {
+                                    self._transitionTicker.stop();
+                                }
                                 if (slideOprions.wacky) {
                                     self.displacementFilter().scale.set(1);
                                     self.displacementSprite().scale.x = self.displacementImageScale()[0];
@@ -333,6 +350,11 @@ var app;
             }
             displacementImageScale() {
                 return this.slideOptions(this._currentSprite).displacementImageScale;
+            }
+            renderTick(delta) {
+                const slide = this.slideOptions(this._currentSprite);
+                if (slide.renderTickMethod)
+                    slide.renderTickMethod(this, delta);
             }
             // *end*
             // Default transition methods
