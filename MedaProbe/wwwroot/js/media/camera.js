@@ -540,4 +540,3 @@ var app;
         media.CameraParty = CameraParty;
     })(media = app.media || (app.media = {}));
 })(app || (app = {}));
-//# sourceMappingURL=camera.js.map

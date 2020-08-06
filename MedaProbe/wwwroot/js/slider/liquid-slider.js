@@ -389,4 +389,3 @@ var app;
         slider_1.LiquidSlider = LiquidSlider;
     })(slider = app.slider || (app.slider = {}));
 })(app || (app = {}));
-//# sourceMappingURL=liquid-slider.js.map

@@ -53,4 +53,3 @@ var app;
         })(customization = slider.customization || (slider.customization = {}));
     })(slider = app.slider || (app.slider = {}));
 })(app || (app = {}));
-//# sourceMappingURL=liquid-methods.js.map
