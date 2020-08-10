@@ -4,8 +4,12 @@
 
     const workerName: string = "Detector worker"
 
-    self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js')
+    //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js')
+
+    self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.1/dist/tf.min.js')
     self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd')
+
+    //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.0.0')
 
     const cocoSsd = (self as any).cocoSsd;
 
