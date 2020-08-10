@@ -10,10 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 (() => __awaiter(this, void 0, void 0, function* () {
     const ctx = self;
     const workerName = "Detector worker";
+    // brings a bug since 06.08.2020
     //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js')
-    self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.1/dist/tf.min.js');
-    self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd');
-    //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.0.0')
+    // works via cdn
+    //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.1/dist/tf.min.js')
+    //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd')
+    // local copy of the scripts
+    self.importScripts('/lib/@tensorflow/tfjs/dist/tf.min.js'); // @2.0.1
+    self.importScripts('/lib/@tensorflow-models/coco-ssd/dist/coco-ssd.min.js');
     const cocoSsd = self.cocoSsd;
     // load model
     const model = yield cocoSsd.load();

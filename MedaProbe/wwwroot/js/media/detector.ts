@@ -4,12 +4,17 @@
 
     const workerName: string = "Detector worker"
 
+    // brings a bug since 06.08.2020
     //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js')
 
-    self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.1/dist/tf.min.js')
-    self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd')
+    // works via cdn
+    //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.1/dist/tf.min.js')
+    //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd')
 
-    //self.importScripts('https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.0.0')
+    // local copy of the scripts
+    self.importScripts('/lib/@tensorflow/tfjs/dist/tf.min.js') // @2.0.1
+    self.importScripts('/lib/@tensorflow-models/coco-ssd/dist/coco-ssd.min.js')
+
 
     const cocoSsd = (self as any).cocoSsd;
 
