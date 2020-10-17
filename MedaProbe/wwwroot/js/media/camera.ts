@@ -68,6 +68,7 @@ namespace app.media {
         constructor(element: Element, options: ICameraProbeOptions) {
             this._navigator = window.navigator;
             this._element = element;
+
             this._streamStarted = false;
             this._streamDetect = false;
 

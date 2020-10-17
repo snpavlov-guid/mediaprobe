@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\js\media\camcorder.ts" />
+    <Content Remove="wwwroot\js\media\camera-background.ts" />
     <Content Remove="wwwroot\js\media\camera.ts" />
     <Content Remove="wwwroot\js\media\declarations.ts" />
     <Content Remove="wwwroot\js\media\detector.ts" />
@@ -44,6 +45,7 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="wwwroot\js\media\camcorder.ts" />
+    <TypeScriptCompile Include="wwwroot\js\media\camera-background.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\camera.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\declarations.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\detector.ts" />
