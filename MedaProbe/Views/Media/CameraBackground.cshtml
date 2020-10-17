@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     Layout = "_ViewLayout";
 
     ViewData["Title"] = "Camera Recognition";
@@ -16,17 +15,19 @@
     <script src="~/js/utils/util-dom.js"></script>
     <script src="~/js/utils/util-image.js"></script>
     <script src="~/js/utils/util-checker.js"></script>
-    <script src="~/js/media/camera.js"></script>
+
+    <script src="~/js/media/camcorder.js"></script>
 }
+
 
 <div class="container">
 
     <section id="camera-party">
 
         <div id="player" class="video-player">
-            
+
             <div class="startup-text">&#9733; it shows camera here &#9733;</div>
-            
+
             <canvas id="cupture"></canvas>
             <video id="video" autoplay></video>
             <canvas id="overlay"></canvas>
@@ -54,27 +55,10 @@
 
         </div>
 
-        <div class="video-detect d-none">
-            <canvas id="source-canvas"></canvas>
-        </div>
-
-        <div class="video-screenshot">
-            <ul class="screenshot-list"></ul>
-        </div>
 
     </section>
 
     <section id="templates">
-
-        <template id="screenshot-item">
-            <img id="screenshot" />
-            <div class="screenshot-ctrl">
-                <button class="screenshot-download" title="Download"></button>
-                <button class="screenshot-remove" title="Remove"></button>
-            </div>
-            <div class="screenshot-info">
-            </div>
-        </template>
 
         <template id="loading-indicator">
             <partial name="common/_loading" />
@@ -88,6 +72,7 @@
 
 </div>
 
+
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -97,9 +82,8 @@
         const checker = new app.util.check.Checker();
         if (!checker.showNotSupportedObjects(["ImageCapture"], "#templates #not-supported", "section.main")) return;
 
-        var cameraParty = new app.media.CameraParty(document.getElementById("camera-party"),
+        var camcorder = new app.media.CamcorderBase(document.getElementById("camera-party"),
             {
-                detectorWorkerScriptUrl: "@Url.Content("~/js/media/detector.js")",
                 debugLog : true
             });
 

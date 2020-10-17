@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\media\camcorder.ts" />
     <Content Remove="wwwroot\js\media\camera.ts" />
     <Content Remove="wwwroot\js\media\declarations.ts" />
     <Content Remove="wwwroot\js\media\detector.ts" />
@@ -28,7 +29,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
   </ItemGroup>
 
 
@@ -42,6 +43,7 @@
 
 
   <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\js\media\camcorder.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\camera.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\declarations.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\detector.ts" />
