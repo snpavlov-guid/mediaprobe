@@ -26,16 +26,16 @@ var app;
             setupComponent() {
                 return __awaiter(this, void 0, void 0, function* () {
                     this._player = this._element.querySelector('.video-player');
-                    this._canvasVideo = this._element.querySelector('.video-player #capture');
                     this._controls = this._element.querySelector('.video-player .controls');
                     this._cameraOptions = this._controls.querySelector('.video-options > select');
                     this._ratioOptions = this._controls.querySelector('.video-ratio > select');
                     this._video = this._element.querySelector('.video-player #video');
+                    this._canvasVideo = this._element.querySelector('.video-player #capture');
+                    this.resizePlayer();
                     this.setupCameraSelectionOptions();
                     this.setupRatioSelectionOptions();
                     this.setupPlayerButtons();
                     this.setControlState(false);
-                    this.resizePlayer();
                     this._cameraOptions.onchange = () => { this.changeCameraSelection(); };
                     this._ratioOptions.onchange = () => { this.changeRatioSelection(); };
                     this._btnPlay.onclick = () => { this.startStream(); };
@@ -97,12 +97,14 @@ var app;
                     track.stop();
                 });
             }
-            getCameraSelectionOptions() {
+            getCameraSelectionOptions(constrains) {
                 return __awaiter(this, void 0, void 0, function* () {
                     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                         var _a;
+                        const givenConstraints = Object.assign({}, constrains);
+                        yield this._navigator.mediaDevices.getUserMedia(givenConstraints);
                         const devices = yield ((_a = this._navigator.mediaDevices) === null || _a === void 0 ? void 0 : _a.enumerateDevices());
-                        const videoDevices = devices === null || devices === void 0 ? void 0 : devices.filter(device => device.kind === 'videoinput');
+                        const videoDevices = devices === null || devices === void 0 ? void 0 : devices.filter(device => device.kind === 'videoinput' && device.deviceId && device.label);
                         const options = videoDevices && videoDevices.length ? videoDevices.map(videoDevice => {
                             console.log(`Device: ${videoDevice.label}; Id: "${videoDevice.deviceId}"`);
                             return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
@@ -113,7 +115,7 @@ var app;
             }
             setupCameraSelectionOptions() {
                 return __awaiter(this, void 0, void 0, function* () {
-                    let cameraOptions = yield this.getCameraSelectionOptions();
+                    let cameraOptions = yield this.getCameraSelectionOptions(this.getVideoConstrains());
                     this._cameraOptions.innerHTML = cameraOptions.join('');
                 });
             }
@@ -213,6 +215,19 @@ var app;
             pauseStream() {
                 this._video.pause();
                 this.setControlState(false);
+            }
+            calcDestRect(player, cadr) {
+                let rect = { cx: 0, cy: 0, cw: 0, ch: 0 };
+                let wkf = player.clientWidth / cadr.width;
+                let hkf = player.clientHeight / cadr.height;
+                let kt = wkf < hkf ? wkf : hkf;
+                rect.cw = cadr.width * kt;
+                rect.ch = cadr.height * kt;
+                if (wkf < hkf)
+                    rect.cy = (player.clientHeight - rect.ch) / 2;
+                else
+                    rect.cx = (player.clientWidth - rect.cw) / 2;
+                return rect;
             }
         }
         CamcorderBase.requiredMediaFeatures = ['mediaDevices', 'getUserMedia'];

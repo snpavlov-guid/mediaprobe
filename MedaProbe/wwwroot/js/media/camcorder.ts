@@ -29,14 +29,13 @@ namespace app.media {
         protected _cameraOptions: HTMLSelectElement;
         protected _ratioOptions: HTMLSelectElement;
 
-        protected _canvasVideo: HTMLCanvasElement;
-
         protected _btnPlay: HTMLButtonElement;
         protected _btnPause: HTMLButtonElement;
         protected _btnScreenshot: HTMLButtonElement;
         protected _btnDetect: HTMLButtonElement;
 
         protected _video: HTMLVideoElement;
+        protected _canvasVideo: HTMLCanvasElement;
 
         protected _controlsViewAnimation: boolean;
 
@@ -82,21 +81,20 @@ namespace app.media {
 
         protected async setupComponent() {
             this._player = this._element.querySelector('.video-player');
-            this._canvasVideo = this._element.querySelector('.video-player #capture');
-
             this._controls = this._element.querySelector('.video-player .controls');
             this._cameraOptions = this._controls.querySelector('.video-options > select');
             this._ratioOptions = this._controls.querySelector('.video-ratio > select');
 
             this._video = this._element.querySelector('.video-player #video');
+            this._canvasVideo = this._element.querySelector('.video-player #capture');
+
+            this.resizePlayer();
 
             this.setupCameraSelectionOptions();
             this.setupRatioSelectionOptions();
             this.setupPlayerButtons();
 
             this.setControlState(false);
-
-            this.resizePlayer();
 
             this._cameraOptions.onchange = () => { this.changeCameraSelection(); };
             this._ratioOptions.onchange = () => { this.changeRatioSelection(); };
@@ -178,10 +176,13 @@ namespace app.media {
         }
 
 
-        protected async getCameraSelectionOptions(): Promise<string[]> {
+        protected async getCameraSelectionOptions(constrains : object): Promise<string[]> {
             return new Promise<string[]>(async (resolve, reject) => {
+                const givenConstraints: MediaStreamConstraints = <MediaStreamConstraints>{ ...constrains };
+                await this._navigator.mediaDevices.getUserMedia(givenConstraints);
+
                 const devices = await this._navigator.mediaDevices?.enumerateDevices();
-                const videoDevices = devices?.filter(device => device.kind === 'videoinput');
+                const videoDevices = devices?.filter(device => device.kind === 'videoinput' && device.deviceId && device.label);
                 const options = videoDevices && videoDevices.length ? videoDevices.map(videoDevice => {
                     console.log(`Device: ${videoDevice.label}; Id: "${videoDevice.deviceId}"`);
                     return `<option value="${videoDevice.deviceId}">${videoDevice.label}</option>`;
@@ -192,7 +193,7 @@ namespace app.media {
         }
 
         protected async setupCameraSelectionOptions() {
-            let cameraOptions = await this.getCameraSelectionOptions();
+            let cameraOptions = await this.getCameraSelectionOptions(this.getVideoConstrains());
             this._cameraOptions.innerHTML = cameraOptions.join('');
         }
 
@@ -321,7 +322,25 @@ namespace app.media {
             this.setControlState(false);
         }
 
+        protected calcDestRect(player: HTMLElement, cadr: { width: number, height : number }) :
+                       { cx: number, cy: number, cw: number, ch: number } {
+            let rect = { cx: 0, cy: 0, cw: 0, ch: 0 };
 
+            let wkf = player.clientWidth / cadr.width;
+            let hkf = player.clientHeight / cadr.height;
+
+            let kt = wkf < hkf ? wkf : hkf;
+
+            rect.cw = cadr.width * kt;
+            rect.ch = cadr.height * kt;
+
+            if (wkf < hkf)
+                rect.cy = (player.clientHeight - rect.ch) / 2;
+            else
+                rect.cx = (player.clientWidth - rect.cw) / 2;
+
+            return rect;
+        }
     }
 
 }
