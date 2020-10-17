@@ -27,5 +27,10 @@ namespace CoreProbe1.Controllers
         {
             return View();
         }
+
+        public IActionResult GoldStar()
+        {
+            return View();
+        }
     }
 }

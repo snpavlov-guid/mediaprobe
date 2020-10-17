@@ -1,0 +1,30 @@
+﻿@{
+    Layout = "_ViewLayout";
+
+    ViewData["Title"] = "Gold Star";
+}
+
+@section head {
+    <link rel="stylesheet" href="~/css/common/general.css" />
+    <link rel="stylesheet" href="~/css/effect/goldstar.css" />
+}
+
+@section scripts {
+    <script src="~/js/utils/util-dom.js"></script>
+    <script src="~/js/utils/util-checker.js"></script>
+}
+
+<div class="shape">
+    <div class="five-point-star"></div>
+</div>
+<div class="shape">
+    <div class="five-point-star"></div>
+</div>
+
+<svg>
+    <filter id="wavy">
+        <feTurbulence x="0" y="0" baseFrequency="0.009" numOctaves="5" seed="2"></feTurbulence>
+        <feDisplacementMap in2="SourceMap" scale="30"></feDisplacementMap>
+    </filter>
+</svg>
+
