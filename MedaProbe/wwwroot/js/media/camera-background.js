@@ -8,12 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var app;
-(function (app) {
+(function (app_1) {
     var media;
     (function (media) {
         class CameraBackground extends media.CamcorderBase {
             constructor(element, options) {
                 super(element, options);
+                this._displacementImageUrl = options.displacementImage;
             }
             setupComponent() {
                 const _super = Object.create(null, {
@@ -23,16 +24,106 @@ var app;
                     _super.setupComponent.call(this);
                     // add video events
                     this._video.addEventListener("play", ev => this.onVideoPlay(ev));
+                    this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
                 });
+            }
+            createPixi() {
+                // check if app created
+                if (this._app)
+                    return;
+                // initialize PIXI app when player is ready to play
+                this.initializePixi();
+                // resize the player and PIXI's video texture
+                this.resizePlayer();
+                this.applyPixiFilrer();
+                // start PIXI animation
+                this.animatePixi();
+            }
+            destroyPixi() {
+                if (!this._app)
+                    return;
+                var app = this._app;
+                var ticker = this._ticker;
+                this._app = null;
+                this._ticker = null;
+                ticker.stop();
+                ticker.destroy();
+                app.destroy(false, { children: true, texture: true, baseTexture: true });
+            }
+            initializePixi() {
+                this._app = new PIXI.Application({ view: this._canvasVideo, transparent: true });
+                // create the root of the scene graph
+                this._stage = new PIXI.Container();
+                // create a video texture from a path
+                this._videoTexture = PIXI.Texture.from(this._video);
+                // create a new Sprite using the video texture (yes it's that easy)
+                this._videoSprite = new PIXI.Sprite(this._videoTexture);
+                this._stage.addChild(this._videoSprite);
+                // create PIXI ticker
+                this._ticker = new PIXI.Ticker();
+                this._ticker.autoStart = true;
+            }
+            animatePixi() {
+                // render the stage
+                this._ticker.add((delta) => {
+                    this._videoTexture.update();
+                    if (this._displacementSprite) {
+                        this._displacementSprite.x += 0.75 * delta;
+                        this._displacementSprite.y += 0.75;
+                    }
+                    this._app.renderer.render(this._stage);
+                });
+            }
+            applyPixiFilrer() {
+                // Blur filter
+                let blurFilter = new PIXI.filters.BlurFilter(20);
+                blurFilter.blur = 50;
+                blurFilter.quality = 10;
+                // Displacement filter
+                this._displacementSprite = PIXI.Sprite.from(this._displacementImageUrl);
+                this._displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+                this._stage.addChild(this._displacementSprite);
+                var displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite, 50);
+                // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
+                displacementFilter.autoFit = false;
+                //this._stage.filters = [blurFilter];
+                this._stage.filters = [displacementFilter];
+            }
+            onVideoCanPlay(ev) {
+                console.log("Video can play fired");
+                // create PIXI staff with deffered way
+                setTimeout(() => this.createPixi(), 0);
             }
             onVideoPlay(ev) {
                 var _a;
                 // remove invite text
                 (_a = this._player.querySelector(".startup-text")) === null || _a === void 0 ? void 0 : _a.remove();
-                // get and save canvas's rendering context
-                this._canvasVideoCtx = this._canvasVideo.getContext('2d');
-                //start video capturing callback
-                this.captureCallback();
+            }
+            resizePlayer() {
+                super.resizePlayer();
+                // resize renderer
+                if (this._app) {
+                    this._app.renderer.resize(this._player.clientWidth, this._player.clientHeight);
+                    const vw = this._video.videoWidth;
+                    const vh = this._video.videoHeight;
+                    // calc frome destination rect
+                    let dr = this.calcDestRect(this._player, { width: vw, height: vh });
+                    this._videoSprite.x = dr.cx;
+                    this._videoSprite.y = dr.cy;
+                    this._videoSprite.width = dr.cw;
+                    this._videoSprite.height = dr.ch;
+                }
+            }
+            changeRatioSelection() {
+                const _super = Object.create(null, {
+                    changeRatioSelection: { get: () => super.changeRatioSelection }
+                });
+                return __awaiter(this, void 0, void 0, function* () {
+                    if (this._streamStarted) {
+                        this.destroyPixi();
+                    }
+                    yield _super.changeRatioSelection.call(this);
+                });
             }
             captureCallback() {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -54,6 +145,6 @@ var app;
             }
         }
         media.CameraBackground = CameraBackground;
-    })(media = app.media || (app.media = {}));
+    })(media = app_1.media || (app_1.media = {}));
 })(app || (app = {}));
 //# sourceMappingURL=camera-background.js.map
