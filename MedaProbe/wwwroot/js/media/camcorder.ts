@@ -36,6 +36,7 @@ namespace app.media {
 
         protected _video: HTMLVideoElement;
         protected _canvasVideo: HTMLCanvasElement;
+        protected _overlayVideo: HTMLCanvasElement;
 
         protected _controlsViewAnimation: boolean;
 
@@ -87,6 +88,7 @@ namespace app.media {
 
             this._video = this._element.querySelector('.video-player #video');
             this._canvasVideo = this._element.querySelector('.video-player #capture');
+            this._overlayVideo = this._element.querySelector('.video-player #overlay'); 
 
             this.resizePlayer();
 
@@ -101,6 +103,7 @@ namespace app.media {
 
             this._btnPlay.onclick = () => { this.startStream(); };
             this._btnPause.onclick = () => { this.pauseStream(); };
+            this._btnDetect.onclick = () => { this.doDetect(); }
 
             this._player.addEventListener("mousemove", ev => { this.animControlsPanel() });
 
@@ -241,11 +244,16 @@ namespace app.media {
             let koef = parseFloat(this._ratioOptions.value);
             this._player.style.height = Math.floor(this._player.offsetWidth / koef) + "px";
 
-            // set size of the capture canvas
+            this.setImageCaptureSize();
+        }
+
+        protected setImageCaptureSize() {
+
             this._canvasVideo.width = this._player.clientWidth;
             this._canvasVideo.height = this._player.clientHeight;
 
-            //this.setImageCaptureSize();
+            this._overlayVideo.width = this._player.clientWidth;
+            this._overlayVideo.height = this._player.clientHeight;
 
         }
 
@@ -307,6 +315,11 @@ namespace app.media {
             if (this._streamStarted) {
                 this._video.play();
                 this.setControlState(true);
+
+                if (this._streamDetect) {
+                    this.startDetection();
+                }
+
                 return;
             }
 
@@ -319,8 +332,26 @@ namespace app.media {
 
             this._video.pause();
 
+            if (this._streamDetect) {
+                this.stopDetection();
+            }
+
             this.setControlState(false);
         }
+
+        protected async doDetect() {
+            let streamDetected = !this._streamDetect;
+
+            if (streamDetected)
+                this.startDetection();
+            else
+                this.stopDetection();
+
+            this._streamDetect = streamDetected;
+
+            this.setDetectState(this._streamDetect);
+        }
+
 
         protected calcDestRect(player: HTMLElement, cadr: { width: number, height : number }) :
                        { cx: number, cy: number, cw: number, ch: number } {
@@ -341,6 +372,15 @@ namespace app.media {
 
             return rect;
         }
+
+        protected startDetection() {
+
+        }
+
+        protected stopDetection() {
+
+        }
+
     }
 
 }

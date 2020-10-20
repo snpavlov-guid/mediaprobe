@@ -22,6 +22,7 @@ var app;
                 });
                 return __awaiter(this, void 0, void 0, function* () {
                     _super.setupComponent.call(this);
+                    this._animationTimeoutId = 0;
                     // add video events
                     this._video.addEventListener("play", ev => this.onVideoPlay(ev));
                     this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
@@ -67,7 +68,7 @@ var app;
                 // render the stage
                 this._ticker.add((delta) => {
                     this._videoTexture.update();
-                    if (this._displacementSprite) {
+                    if (this._displacementSprite && !this._video.paused) {
                         this._displacementSprite.x += 0.75 * delta;
                         this._displacementSprite.y += 0.75;
                     }
@@ -92,7 +93,12 @@ var app;
             onVideoCanPlay(ev) {
                 console.log("Video can play fired");
                 // create PIXI staff with deffered way
-                setTimeout(() => this.createPixi(), 0);
+                setTimeout(() => {
+                    this.createPixi();
+                    if (this._streamDetect) {
+                        this.startDetection();
+                    }
+                }, 0);
             }
             onVideoPlay(ev) {
                 var _a;
@@ -119,11 +125,31 @@ var app;
                     changeRatioSelection: { get: () => super.changeRatioSelection }
                 });
                 return __awaiter(this, void 0, void 0, function* () {
+                    if (this._streamDetect) {
+                        this.stopDetection();
+                    }
                     if (this._streamStarted) {
                         this.destroyPixi();
                     }
                     yield _super.changeRatioSelection.call(this);
                 });
+            }
+            startDetection() {
+                // Get overlay canvas
+                this._canvasOverlayCtx = this._overlayVideo.getContext("2d");
+                this._animationTimeoutId = requestAnimationFrame(() => {
+                    this.detectionMethod();
+                    this._overlayVideo.classList.remove("d-none");
+                    this._canvasVideo.classList.add("d-none");
+                });
+                console.log("Start detecting");
+            }
+            stopDetection() {
+                this._canvasVideo.classList.remove("d-none");
+                this._overlayVideo.classList.add("d-none");
+                cancelAnimationFrame(this._animationTimeoutId);
+                this._canvasOverlayCtx = null;
+                console.log("Stop detecting");
             }
             captureCallback() {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -141,6 +167,20 @@ var app;
                     //this._canvasVideoCtx.drawImage(this._video, 0, 0, vw, vh);
                     //repeat capturing
                     setTimeout(() => this.captureCallback(), 0);
+                });
+            }
+            detectionMethod() {
+                if (!this._app)
+                    return;
+                let pixiCanvas = this._app.renderer.extract.canvas();
+                let pixiCtx = pixiCanvas.getContext('2d');
+                let frame = pixiCtx.getImageData(0, 0, pixiCanvas.width, pixiCanvas.height);
+                this._canvasOverlayCtx.putImageData(frame, 0, 0);
+                //this._animationTimeoutId = setTimeout(() => {
+                //    this.detectionMethod()
+                //}, 0);
+                this._animationTimeoutId = requestAnimationFrame(() => {
+                    this.detectionMethod();
                 });
             }
         }

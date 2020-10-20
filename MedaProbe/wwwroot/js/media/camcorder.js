@@ -31,6 +31,7 @@ var app;
                     this._ratioOptions = this._controls.querySelector('.video-ratio > select');
                     this._video = this._element.querySelector('.video-player #video');
                     this._canvasVideo = this._element.querySelector('.video-player #capture');
+                    this._overlayVideo = this._element.querySelector('.video-player #overlay');
                     this.resizePlayer();
                     this.setupCameraSelectionOptions();
                     this.setupRatioSelectionOptions();
@@ -40,6 +41,7 @@ var app;
                     this._ratioOptions.onchange = () => { this.changeRatioSelection(); };
                     this._btnPlay.onclick = () => { this.startStream(); };
                     this._btnPause.onclick = () => { this.pauseStream(); };
+                    this._btnDetect.onclick = () => { this.doDetect(); };
                     this._player.addEventListener("mousemove", ev => { this.animControlsPanel(); });
                     window.addEventListener("resize", ev => { this.resizePlayer(); });
                     console.log("Camera player created");
@@ -157,10 +159,13 @@ var app;
             resizePlayer() {
                 let koef = parseFloat(this._ratioOptions.value);
                 this._player.style.height = Math.floor(this._player.offsetWidth / koef) + "px";
-                // set size of the capture canvas
+                this.setImageCaptureSize();
+            }
+            setImageCaptureSize() {
                 this._canvasVideo.width = this._player.clientWidth;
                 this._canvasVideo.height = this._player.clientHeight;
-                //this.setImageCaptureSize();
+                this._overlayVideo.width = this._player.clientWidth;
+                this._overlayVideo.height = this._player.clientHeight;
             }
             animControlsPanel() {
                 if (!this._controlsViewAnimation) {
@@ -206,6 +211,9 @@ var app;
                     if (this._streamStarted) {
                         this._video.play();
                         this.setControlState(true);
+                        if (this._streamDetect) {
+                            this.startDetection();
+                        }
                         return;
                     }
                     // request and start media stream
@@ -214,7 +222,21 @@ var app;
             }
             pauseStream() {
                 this._video.pause();
+                if (this._streamDetect) {
+                    this.stopDetection();
+                }
                 this.setControlState(false);
+            }
+            doDetect() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    let streamDetected = !this._streamDetect;
+                    if (streamDetected)
+                        this.startDetection();
+                    else
+                        this.stopDetection();
+                    this._streamDetect = streamDetected;
+                    this.setDetectState(this._streamDetect);
+                });
             }
             calcDestRect(player, cadr) {
                 let rect = { cx: 0, cy: 0, cw: 0, ch: 0 };
@@ -228,6 +250,10 @@ var app;
                 else
                     rect.cx = (player.clientWidth - rect.cw) / 2;
                 return rect;
+            }
+            startDetection() {
+            }
+            stopDetection() {
             }
         }
         CamcorderBase.requiredMediaFeatures = ['mediaDevices', 'getUserMedia'];

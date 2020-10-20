@@ -7,17 +7,19 @@ namespace app.media {
 
     export class CameraBackground extends CamcorderBase {
 
-        protected _canvasVideoCtx: CanvasRenderingContext2D;
-
         protected _app: PIXI.Application;
         protected _stage: PIXI.Container;
         protected _videoTexture: PIXI.Texture;
         protected _videoSprite: PIXI.Sprite;
         protected _ticker: PIXI.Ticker;
 
+        protected _displacementImageUrl: string;
         protected _displacementSprite: PIXI.Sprite;
 
-        protected _displacementImageUrl: string;
+        protected _canvasVideoCtx: CanvasRenderingContext2D;
+        protected _canvasOverlayCtx: CanvasRenderingContext2D;
+
+        protected _animationTimeoutId: number;
 
         constructor(element: Element, options: ICameraBackgroundOptions) {
             super(element, options);
@@ -27,6 +29,8 @@ namespace app.media {
 
         protected async setupComponent() {
             super.setupComponent();
+
+            this._animationTimeoutId = 0;
 
             // add video events
             this._video.addEventListener("play", ev => this.onVideoPlay(ev));
@@ -97,7 +101,7 @@ namespace app.media {
             this._ticker.add((delta) => {
                 this._videoTexture.update();
 
-                if (this._displacementSprite) {
+                if (this._displacementSprite && !this._video.paused) {
                         this._displacementSprite.x += 0.75 * delta;
                         this._displacementSprite.y += 0.75 ;
                 }
@@ -138,7 +142,14 @@ namespace app.media {
             console.log("Video can play fired")
 
             // create PIXI staff with deffered way
-            setTimeout(() => this.createPixi(), 0);
+            setTimeout(() => {
+                this.createPixi();
+
+                if (this._streamDetect) {
+                    this.startDetection();
+                }
+
+            }, 0);
         }
 
         protected onVideoPlay(ev) {
@@ -173,6 +184,10 @@ namespace app.media {
 
         protected async changeRatioSelection() {
 
+            if (this._streamDetect) {
+                this.stopDetection();
+            }
+
             if (this._streamStarted) {
                 this.destroyPixi();
             }
@@ -180,6 +195,34 @@ namespace app.media {
             await super.changeRatioSelection();
 
         }
+
+        protected startDetection() {
+
+            // Get overlay canvas
+            this._canvasOverlayCtx = this._overlayVideo.getContext("2d"); 
+
+            this._animationTimeoutId = requestAnimationFrame(() => {
+                this.detectionMethod();
+
+                this._overlayVideo.classList.remove("d-none");
+                this._canvasVideo.classList.add("d-none");
+            });
+
+            console.log("Start detecting");
+
+        }
+
+        protected stopDetection() {
+
+            this._canvasVideo.classList.remove("d-none");
+            this._overlayVideo.classList.add("d-none");
+
+            cancelAnimationFrame(this._animationTimeoutId);
+
+            this._canvasOverlayCtx = null;
+
+            console.log("Stop detecting");
+        }  
 
         protected async captureCallback() {
 
@@ -205,7 +248,26 @@ namespace app.media {
             setTimeout(() => this.captureCallback(), 0);
         }
 
-   
+        protected detectionMethod() {
+
+            if (!this._app) return;
+
+            let pixiCanvas = <HTMLCanvasElement>(<any>this._app.renderer.extract).canvas();
+            let pixiCtx = pixiCanvas.getContext('2d');
+
+            let frame = pixiCtx.getImageData(0, 0, pixiCanvas.width, pixiCanvas.height);
+
+            this._canvasOverlayCtx.putImageData(frame, 0, 0);
+
+            //this._animationTimeoutId = setTimeout(() => {
+            //    this.detectionMethod()
+            //}, 0);
+
+            this._animationTimeoutId = requestAnimationFrame(() => {
+                this.detectionMethod()
+            });
+        }
+  
 
     }
 
