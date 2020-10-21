@@ -252,7 +252,7 @@ namespace app.media {
 
             if (!this._app) return;
 
-            let pixiCanvas = <HTMLCanvasElement>(<any>this._app.renderer.extract).canvas();
+            let pixiCanvas = <any>this._app.renderer.plugins.extract.canvas(this._stage);
             let pixiCtx = pixiCanvas.getContext('2d');
 
             let frame = pixiCtx.getImageData(0, 0, pixiCanvas.width, pixiCanvas.height);
