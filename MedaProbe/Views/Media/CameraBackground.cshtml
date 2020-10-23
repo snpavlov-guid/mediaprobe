@@ -93,6 +93,7 @@
         var camera = new app.media.CameraBackground(document.getElementById("camera-party"),
             {
                 debugLog: true,
+                detectorWorkerScriptUrl: "@(Url.Content("~/js/media/detector-bodypix.js") + "?_=" + DateTime.Now.Millisecond))",
                 displacementImage: "@Url.Content("~/img/liquids/dmaps/512x512/clouds.jpg")",
             });
 

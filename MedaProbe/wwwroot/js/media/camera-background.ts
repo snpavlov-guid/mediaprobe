@@ -49,6 +49,7 @@ namespace app.media {
             // resize the player and PIXI's video texture
             this.resizePlayer();
 
+            // TODO: add filters
             this.applyPixiFilrer();
 
             // start PIXI animation
@@ -132,8 +133,8 @@ namespace app.media {
             // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
             displacementFilter.autoFit = false;
 
-            //this._stage.filters = [blurFilter];
-            this._stage.filters = [displacementFilter];
+            this._stage.filters = [blurFilter];
+            //this._stage.filters = [displacementFilter];
 
         }
 
@@ -142,11 +143,11 @@ namespace app.media {
             console.log("Video can play fired")
 
             // create PIXI staff with deffered way
-            setTimeout(() => {
+            setTimeout(async () => {
                 this.createPixi();
 
                 if (this._streamDetect) {
-                    this.startDetection();
+                    await this.startDetection();
                 }
 
             }, 0);
@@ -196,13 +197,17 @@ namespace app.media {
 
         }
 
-        protected startDetection() {
+        protected async startDetection() {
+
+            // load detector worker
+            await this.loadDetector();
 
             // Get overlay canvas
             this._canvasOverlayCtx = this._overlayVideo.getContext("2d"); 
 
-            this._animationTimeoutId = requestAnimationFrame(() => {
-                this.detectionMethod();
+            this._animationTimeoutId = requestAnimationFrame(async () => {
+
+                await this.detectionMethod();
 
                 this._overlayVideo.classList.remove("d-none");
                 this._canvasVideo.classList.add("d-none");
@@ -248,27 +253,41 @@ namespace app.media {
             setTimeout(() => this.captureCallback(), 0);
         }
 
-        protected detectionMethod() {
+        protected async detectionMethod() {
 
             if (!this._app) return;
 
-            let pixiCanvas = <any>this._app.renderer.plugins.extract.canvas(this._stage);
-            let pixiCtx = pixiCanvas.getContext('2d');
+            // get image data from video stream
+            let videoCanvas = this._app.renderer.plugins.extract.canvas(this._videoSprite);
+            let videoCtx = videoCanvas.getContext('2d');
+            let cadr = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
 
+            // get image data from PIXI stage
+            let pixiCanvas = this._app.renderer.plugins.extract.canvas(this._stage);
+            let pixiCtx = pixiCanvas.getContext('2d');
             let frame = pixiCtx.getImageData(0, 0, pixiCanvas.width, pixiCanvas.height);
 
-            this._canvasOverlayCtx.putImageData(frame, 0, 0);
+            // detect image
+            let segmentation = await this.detectImage<BodyPix.SemanticPersonSegmentation>(cadr);
 
-            //this._animationTimeoutId = setTimeout(() => {
-            //    this.detectionMethod()
-            //}, 0);
+            // apply body by mask
+            let scene = util.image.combineImagesByMask(frame, cadr, segmentation.data, p => !!p);
 
-            this._animationTimeoutId = requestAnimationFrame(() => {
-                this.detectionMethod()
+            // source video size
+            const vw = this._video.videoWidth;
+            const vh = this._video.videoHeight;
+
+            // calc frome destination rect
+            let dr = this.calcDestRect(this._player, { width: vw, height: vh });
+
+            // put image data
+            this._canvasOverlayCtx.putImageData(scene, dr.cx, dr.cy);
+
+            this._animationTimeoutId = requestAnimationFrame(async () => {
+                await this.detectionMethod()
             });
         }
-  
-
+         
     }
 
 

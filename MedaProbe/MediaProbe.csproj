@@ -12,9 +12,11 @@
     <Content Remove="wwwroot\js\media\camera-background.ts" />
     <Content Remove="wwwroot\js\media\camera.ts" />
     <Content Remove="wwwroot\js\media\declarations.ts" />
+    <Content Remove="wwwroot\js\media\detector-bodypix.ts" />
     <Content Remove="wwwroot\js\media\detector.ts" />
     <Content Remove="wwwroot\js\slider\liquid-methods.ts" />
     <Content Remove="wwwroot\js\slider\liquid-slider.ts" />
+    <Content Remove="wwwroot\js\typings\body-pix-declarations.d.ts" />
     <Content Remove="wwwroot\js\typings\gsap-proxy.d.ts" />
     <Content Remove="wwwroot\js\typings\pixi.js.d.ts" />
     <Content Remove="wwwroot\js\utils\util-checker.ts" />
@@ -44,6 +46,7 @@
 
 
   <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\js\media\detector-bodypix.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\camcorder.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\camera-background.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\camera.ts" />
@@ -51,6 +54,7 @@
     <TypeScriptCompile Include="wwwroot\js\media\detector.ts" />
     <TypeScriptCompile Include="wwwroot\js\slider\liquid-methods.ts" />
     <TypeScriptCompile Include="wwwroot\js\slider\liquid-slider.ts" />
+    <TypeScriptCompile Include="wwwroot\js\typings\body-pix-declarations.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\gsap-proxy.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\pixi.js.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-checker.ts" />

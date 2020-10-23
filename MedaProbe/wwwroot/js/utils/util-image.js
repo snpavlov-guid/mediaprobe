@@ -38,6 +38,30 @@ var app;
                 return frame;
             }
             image.combineImageData = combineImageData;
+            function combineImagesByMask(frame, over, mask, applyMask, setTransparent = false) {
+                let lf = frame.data.length / 4;
+                let lo = over.data.length / 4;
+                if (lf != lo)
+                    throw Error("Frame data lengths are not equals!");
+                if (lf != mask.length)
+                    throw Error("Frame and mask data lengths are not equals!");
+                for (let i = 0; i < lf; i++) {
+                    if (applyMask(mask[i])) {
+                        frame.data[i * 4 + 0] = over.data[i * 4 + 0];
+                        frame.data[i * 4 + 1] = over.data[i * 4 + 1];
+                        frame.data[i * 4 + 2] = over.data[i * 4 + 2];
+                        frame.data[i * 4 + 3] = over.data[i * 4 + 3];
+                    }
+                    else if (setTransparent) {
+                        frame.data[i * 4 + 0] = 0;
+                        frame.data[i * 4 + 1] = 0;
+                        frame.data[i * 4 + 2] = 0;
+                        frame.data[i * 4 + 3] = 1;
+                    }
+                }
+                return frame;
+            }
+            image.combineImagesByMask = combineImagesByMask;
         })(image = util.image || (util.image = {}));
     })(util = app.util || (app.util = {}));
 })(app || (app = {}));

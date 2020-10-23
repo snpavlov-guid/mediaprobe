@@ -167,6 +167,13 @@ var app;
                 this._overlayVideo.width = this._player.clientWidth;
                 this._overlayVideo.height = this._player.clientHeight;
             }
+            waitForVideoMetadata() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    return new Promise((resolve, reject) => {
+                        this._video.onloadedmetadata = (ev) => resolve(true);
+                    });
+                });
+            }
             animControlsPanel() {
                 if (!this._controlsViewAnimation) {
                     this._controlsViewAnimation = true;
@@ -180,6 +187,24 @@ var app;
                     };
                     this._controls.addEventListener("animationend", onAnimationEnd);
                 }
+            }
+            setWaitCursor(wait) {
+                if (wait)
+                    this._player.classList.add("wait-cursor");
+                else
+                    this._player.classList.remove("wait-cursor");
+            }
+            setLoading(wait) {
+                if (wait) {
+                    this._player.appendChild(this.getLoadingTemplate());
+                }
+                else {
+                    this._player.querySelector("ul.loading").remove();
+                }
+            }
+            getLoadingTemplate() {
+                let template = document.querySelector("#templates #loading-indicator");
+                return template.content.cloneNode(true);
             }
             changeCameraSelection() {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -254,6 +279,35 @@ var app;
             startDetection() {
             }
             stopDetection() {
+            }
+            loadDetector() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    if (this._detector)
+                        return;
+                    this.setWaitCursor(true);
+                    this.setLoading(true);
+                    console.log("Detector worker loading...");
+                    this._detector = new Worker(this._detectorScript);
+                    yield new Promise((resolve, reject) => {
+                        this._detector.onmessage = (_) => {
+                            console.log("Detector worker loaded");
+                            resolve();
+                        };
+                    });
+                    this.setLoading(false);
+                    this.setWaitCursor(false);
+                });
+            }
+            detectImage(imgData) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    // post image to detection
+                    this._detector.postMessage(imgData);
+                    return yield new Promise((resolve, reject) => {
+                        this._detector.onmessage = (ev) => {
+                            resolve(ev.data);
+                        };
+                    });
+                });
             }
         }
         CamcorderBase.requiredMediaFeatures = ['mediaDevices', 'getUserMedia'];

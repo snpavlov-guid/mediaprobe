@@ -40,6 +40,8 @@ namespace app.media {
 
         protected _controlsViewAnimation: boolean;
 
+        protected _detector: Worker;
+
 
         public static readonly requiredMediaFeatures = ['mediaDevices', 'getUserMedia'];
 
@@ -257,6 +259,12 @@ namespace app.media {
 
         }
 
+        protected async waitForVideoMetadata(): Promise<boolean> {
+            return new Promise<boolean>((resolve, reject) => {
+                this._video.onloadedmetadata = (ev) => resolve(true);
+            })
+        }
+
         protected animControlsPanel() {
 
             if (!this._controlsViewAnimation) {
@@ -275,6 +283,24 @@ namespace app.media {
                 this._controls.addEventListener("animationend", onAnimationEnd);
 
             }
+        }
+
+        public setWaitCursor(wait: boolean) {
+            if (wait) this._player.classList.add("wait-cursor")
+            else this._player.classList.remove("wait-cursor")
+        }
+
+        public setLoading(wait: boolean) {
+            if (wait) {
+                this._player.appendChild(this.getLoadingTemplate());
+            } else {
+                this._player.querySelector("ul.loading").remove();
+            }
+        }
+
+        protected getLoadingTemplate(): Node {
+            let template = <HTMLTemplateElement>document.querySelector("#templates #loading-indicator");
+            return template.content.cloneNode(true);
         }
 
         protected async changeCameraSelection() {
@@ -381,6 +407,41 @@ namespace app.media {
 
         }
 
+        protected async loadDetector() {
+
+            if (this._detector) return;
+
+            this.setWaitCursor(true);
+            this.setLoading(true);
+
+            console.log("Detector worker loading...");
+
+            this._detector = new Worker(this._detectorScript)
+
+            await new Promise((resolve, reject) => {
+                this._detector.onmessage = (_) => {
+                    console.log("Detector worker loaded");
+                    resolve()
+                }
+            })
+
+            this.setLoading(false);
+            this.setWaitCursor(false);
+        }
+
+        protected async detectImage<TRES>(imgData: ImageData): Promise<TRES> {
+
+            // post image to detection
+            this._detector.postMessage(imgData);
+
+            return await new Promise<TRES>((resolve, reject) => {
+                this._detector.onmessage = (ev: MessageEvent) => {
+                    resolve(ev.data);
+                }
+
+            });
+
+        }
     }
 
 }
