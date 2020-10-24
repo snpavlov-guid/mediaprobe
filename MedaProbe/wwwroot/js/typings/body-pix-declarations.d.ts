@@ -96,6 +96,12 @@ declare namespace BodyPix {
     export const PERSON_INFERENCE_CONFIG: PersonInferenceConfig;
     export const MULTI_PERSON_INSTANCE_INFERENCE_CONFIG: MultiPersonInstanceInferenceConfig;
 
+    export interface IBodyPix {
+
+        segmentPerson(input: BodyPixInput, config?: PersonInferenceConfig): Promise<SemanticPersonSegmentation>;
+
+    }
+
     //export abstract class BaseModel {
     //    protected readonly model: tfconv.GraphModel;
     //    readonly outputStride: BodyPixOutputStride;

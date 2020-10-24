@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="~/css/common/general.css" />
     <link rel="stylesheet" href="~/css/common/loading.css" />
     <link rel="stylesheet" href="~/css/media/media.css" />
+
+    <!-- Load TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@@tensorflow/tfjs@1.2"></script>
+    <!-- Load BodyPix -->
+    <script src="https://cdn.jsdelivr.net/npm/@@tensorflow-models/body-pix@2.0"></script>
+
 }
 
 @section scripts {
@@ -33,7 +39,8 @@
 
             <div class="startup-text">&#9733; it shows camera here &#9733;</div>
 
-            <canvas id="capture" ></canvas>
+            <canvas id="cadre" class="d-none"></canvas>
+            <canvas id="capture"></canvas>
             <video id="video" autoplay class="d-none"></video>
             <canvas id="overlay"></canvas>
 

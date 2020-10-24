@@ -20,7 +20,8 @@ section#camera-party {
 
 .video-player #capture,
 .video-player #video,
-.video-player #overlay
+.video-player #overlay,
+.video-player #cadre
 {
     position:absolute;
     left: 0;

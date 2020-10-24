@@ -21,7 +21,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     /** for optional arguments, see https://github.com/tensorflow/tfjs-models/tree/master/body-pix **/
     const net = yield bodyPix.load();
     console.log(`${workerName}: model loaded`);
-    ctx.postMessage({});
+    ctx.postMessage({ bodyPix: net });
     ctx.onmessage = (ev) => __awaiter(this, void 0, void 0, function* () {
         const segmentation = yield net.segmentPerson(ev.data, {
             flipHorizontal: false,

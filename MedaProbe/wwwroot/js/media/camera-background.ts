@@ -19,7 +19,12 @@ namespace app.media {
         protected _canvasVideoCtx: CanvasRenderingContext2D;
         protected _canvasOverlayCtx: CanvasRenderingContext2D;
 
+        protected _canvasCadre: HTMLCanvasElement;
+        protected _canvasCadreCtx: CanvasRenderingContext2D;
+
         protected _animationTimeoutId: number;
+
+        protected _bodyPix: BodyPix.IBodyPix;
 
         constructor(element: Element, options: ICameraBackgroundOptions) {
             super(element, options);
@@ -31,6 +36,8 @@ namespace app.media {
             super.setupComponent();
 
             this._animationTimeoutId = 0;
+
+            this._canvasCadre = this._element.querySelector('.video-player #cadre'); 
 
             // add video events
             this._video.addEventListener("play", ev => this.onVideoPlay(ev));
@@ -183,6 +190,16 @@ namespace app.media {
 
         }
 
+        protected setImageCaptureSize() {
+            super.setImageCaptureSize();
+
+            if (this._canvasCadre) {
+                this._canvasCadre.width = this._player.clientWidth;
+                this._canvasCadre.height = this._player.clientHeight;
+            }
+
+        }
+
         protected async changeRatioSelection() {
 
             if (this._streamDetect) {
@@ -199,11 +216,14 @@ namespace app.media {
 
         protected async startDetection() {
 
-            // load detector worker
-            await this.loadDetector();
+            // load body-pix detector worker
+            if (!this._bodyPix) {
+                this._bodyPix = await this.loadDetector<BodyPix.IBodyPix>(this.loadBodyPixDetector);
+            }
 
             // Get overlay canvas
             this._canvasOverlayCtx = this._overlayVideo.getContext("2d"); 
+            this._canvasCadreCtx = this._canvasCadre.getContext("2d");
 
             this._animationTimeoutId = requestAnimationFrame(async () => {
 
@@ -225,6 +245,7 @@ namespace app.media {
             cancelAnimationFrame(this._animationTimeoutId);
 
             this._canvasOverlayCtx = null;
+            this._canvasCadreCtx = null;
 
             console.log("Stop detecting");
         }  
@@ -257,35 +278,88 @@ namespace app.media {
 
             if (!this._app) return;
 
-            // get image data from video stream
-            let videoCanvas = this._app.renderer.plugins.extract.canvas(this._videoSprite);
-            let videoCtx = videoCanvas.getContext('2d');
-            let cadr = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
+            if (!this._bodyPix) return;
 
-            // get image data from PIXI stage
-            let pixiCanvas = this._app.renderer.plugins.extract.canvas(this._stage);
-            let pixiCtx = pixiCanvas.getContext('2d');
-            let frame = pixiCtx.getImageData(0, 0, pixiCanvas.width, pixiCanvas.height);
+            if (!this._canvasOverlayCtx) return;
 
-            // detect image
-            let segmentation = await this.detectImage<BodyPix.SemanticPersonSegmentation>(cadr);
-
-            // apply body by mask
-            let scene = util.image.combineImagesByMask(frame, cadr, segmentation.data, p => !!p);
+            //console.time('detectionMethod');
 
             // source video size
             const vw = this._video.videoWidth;
             const vh = this._video.videoHeight;
 
-            // calc frome destination rect
             let dr = this.calcDestRect(this._player, { width: vw, height: vh });
 
+            //const vwp = this._player.clientWidth;
+            //const vhp = this._player.clientHeight;
+
+            // get image data from video stream via PIXI export
+            //let videoCanvas = this._app.renderer.plugins.extract.canvas(this._videoSprite);
+            //let videoCtx = videoCanvas.getContext('2d');
+            //let cadr = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
+
+            // Export PIXI stage canvas
+            let pixiCanvas = this._app.renderer.plugins.extract.canvas(this._stage);
+
+            let canvasWidth = Math.min(this._canvasCadre.width, pixiCanvas.width);
+            let canvasHeight = Math.min(this._canvasCadre.height, pixiCanvas.height);
+
+            // get image data from video stream directly
+            this._canvasCadreCtx.drawImage(this._video, 0, 0, vw, vh, 0, 0, dr.cw, dr.ch);
+            let cadre = this._canvasCadreCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+
+            // get image data from PIXI stage
+            let pixiCtx = pixiCanvas.getContext('2d');
+            let frame = pixiCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+
+            //console.log(`Cadre: ${cadre.width}, ${cadre.height}`);
+            //console.log(`Frame: ${frame.width}, ${frame.height}`);
+
+            //const same = cadre.data.length == frame.data.length;
+            //console.log(`IsSame: ${same}; Cadr: ${cadre.data.length}, Frame: ${frame.data.length}`);
+
+            // detect image
+            let segmentation = await this.detectBodyPixImage(cadre);
+
+            // apply body by mask
+            let scene = util.image.combineImagesByMask(frame, cadre, segmentation.data, p => !!p);
+
+            //let scene = frame;
+
+            // calc frome destination rect
+            //let dr = this.calcDestRect(this._player, { width: vw, height: vh });
+
             // put image data
-            this._canvasOverlayCtx.putImageData(scene, dr.cx, dr.cy);
+            this._canvasOverlayCtx?.putImageData(scene, dr.cx, dr.cy);
+
+            //this._canvasOverlayCtx?.putImageData(scene, 0, 0);
+
+            //console.timeEnd('detectionMethod');
 
             this._animationTimeoutId = requestAnimationFrame(async () => {
                 await this.detectionMethod()
             });
+        }
+
+        protected async loadBodyPixDetector(): Promise<BodyPix.IBodyPix> {
+
+            const bodyPix = (window as any).bodyPix;
+
+            const net = <BodyPix.IBodyPix>await bodyPix.load();
+
+            return net;
+        }
+
+        protected async detectBodyPixImage(imgData: ImageData): Promise<BodyPix.SemanticPersonSegmentation> {
+
+            const segmentation = await this._bodyPix?.segmentPerson(imgData, {
+                flipHorizontal: false,
+                internalResolution: 'medium',
+                segmentationThreshold: 0.7
+            });
+
+            return segmentation;
+
         }
          
     }

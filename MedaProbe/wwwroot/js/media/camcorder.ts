@@ -407,26 +407,27 @@ namespace app.media {
 
         }
 
-        protected async loadDetector() {
+        protected async loadDetectorMethod<TDetector>(): Promise<TDetector> {
+            return await new Promise<TDetector>((resolve, reject) => {
+                resolve(<TDetector>{});
+            });
+        }
 
-            if (this._detector) return;
+        protected async loadDetector<TDetector>(loadMethod : () => Promise<TDetector>): Promise<TDetector> {
 
             this.setWaitCursor(true);
             this.setLoading(true);
 
             console.log("Detector worker loading...");
 
-            this._detector = new Worker(this._detectorScript)
+            let detector = await loadMethod();
 
-            await new Promise((resolve, reject) => {
-                this._detector.onmessage = (_) => {
-                    console.log("Detector worker loaded");
-                    resolve()
-                }
-            })
+            console.log("Detector worker loaded");
 
             this.setLoading(false);
             this.setWaitCursor(false);
+
+            return detector;
         }
 
         protected async detectImage<TRES>(imgData: ImageData): Promise<TRES> {

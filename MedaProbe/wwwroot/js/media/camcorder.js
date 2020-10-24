@@ -280,22 +280,23 @@ var app;
             }
             stopDetection() {
             }
-            loadDetector() {
+            loadDetectorMethod() {
                 return __awaiter(this, void 0, void 0, function* () {
-                    if (this._detector)
-                        return;
+                    return yield new Promise((resolve, reject) => {
+                        resolve({});
+                    });
+                });
+            }
+            loadDetector(loadMethod) {
+                return __awaiter(this, void 0, void 0, function* () {
                     this.setWaitCursor(true);
                     this.setLoading(true);
                     console.log("Detector worker loading...");
-                    this._detector = new Worker(this._detectorScript);
-                    yield new Promise((resolve, reject) => {
-                        this._detector.onmessage = (_) => {
-                            console.log("Detector worker loaded");
-                            resolve();
-                        };
-                    });
+                    let detector = yield loadMethod();
+                    console.log("Detector worker loaded");
                     this.setLoading(false);
                     this.setWaitCursor(false);
+                    return detector;
                 });
             }
             detectImage(imgData) {

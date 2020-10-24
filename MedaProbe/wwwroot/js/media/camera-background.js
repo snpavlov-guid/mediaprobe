@@ -23,6 +23,7 @@ var app;
                 return __awaiter(this, void 0, void 0, function* () {
                     _super.setupComponent.call(this);
                     this._animationTimeoutId = 0;
+                    this._canvasCadre = this._element.querySelector('.video-player #cadre');
                     // add video events
                     this._video.addEventListener("play", ev => this.onVideoPlay(ev));
                     this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
@@ -121,6 +122,13 @@ var app;
                     this._videoSprite.height = dr.ch;
                 }
             }
+            setImageCaptureSize() {
+                super.setImageCaptureSize();
+                if (this._canvasCadre) {
+                    this._canvasCadre.width = this._player.clientWidth;
+                    this._canvasCadre.height = this._player.clientHeight;
+                }
+            }
             changeRatioSelection() {
                 const _super = Object.create(null, {
                     changeRatioSelection: { get: () => super.changeRatioSelection }
@@ -137,10 +145,13 @@ var app;
             }
             startDetection() {
                 return __awaiter(this, void 0, void 0, function* () {
-                    // load detector worker
-                    yield this.loadDetector();
+                    // load body-pix detector worker
+                    if (!this._bodyPix) {
+                        this._bodyPix = yield this.loadDetector(this.loadBodyPixDetector);
+                    }
                     // Get overlay canvas
                     this._canvasOverlayCtx = this._overlayVideo.getContext("2d");
+                    this._canvasCadreCtx = this._canvasCadre.getContext("2d");
                     this._animationTimeoutId = requestAnimationFrame(() => __awaiter(this, void 0, void 0, function* () {
                         yield this.detectionMethod();
                         this._overlayVideo.classList.remove("d-none");
@@ -154,6 +165,7 @@ var app;
                 this._overlayVideo.classList.add("d-none");
                 cancelAnimationFrame(this._animationTimeoutId);
                 this._canvasOverlayCtx = null;
+                this._canvasCadreCtx = null;
                 console.log("Stop detecting");
             }
             captureCallback() {
@@ -175,31 +187,71 @@ var app;
                 });
             }
             detectionMethod() {
+                var _a;
                 return __awaiter(this, void 0, void 0, function* () {
                     if (!this._app)
                         return;
-                    // get image data from video stream
-                    let videoCanvas = this._app.renderer.plugins.extract.canvas(this._videoSprite);
-                    let videoCtx = videoCanvas.getContext('2d');
-                    let cadr = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
-                    // get image data from PIXI stage
-                    let pixiCanvas = this._app.renderer.plugins.extract.canvas(this._stage);
-                    let pixiCtx = pixiCanvas.getContext('2d');
-                    let frame = pixiCtx.getImageData(0, 0, pixiCanvas.width, pixiCanvas.height);
-                    // detect image
-                    let segmentation = yield this.detectImage(cadr);
-                    // apply body by mask
-                    let scene = app_1.util.image.combineImagesByMask(frame, cadr, segmentation.data, p => !!p);
+                    if (!this._bodyPix)
+                        return;
+                    if (!this._canvasOverlayCtx)
+                        return;
+                    //console.time('detectionMethod');
                     // source video size
                     const vw = this._video.videoWidth;
                     const vh = this._video.videoHeight;
-                    // calc frome destination rect
                     let dr = this.calcDestRect(this._player, { width: vw, height: vh });
+                    //const vwp = this._player.clientWidth;
+                    //const vhp = this._player.clientHeight;
+                    // get image data from video stream via PIXI export
+                    //let videoCanvas = this._app.renderer.plugins.extract.canvas(this._videoSprite);
+                    //let videoCtx = videoCanvas.getContext('2d');
+                    //let cadr = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
+                    // Export PIXI stage canvas
+                    let pixiCanvas = this._app.renderer.plugins.extract.canvas(this._stage);
+                    let canvasWidth = Math.min(this._canvasCadre.width, pixiCanvas.width);
+                    let canvasHeight = Math.min(this._canvasCadre.height, pixiCanvas.height);
+                    // get image data from video stream directly
+                    this._canvasCadreCtx.drawImage(this._video, 0, 0, vw, vh, 0, 0, dr.cw, dr.ch);
+                    let cadre = this._canvasCadreCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+                    // get image data from PIXI stage
+                    let pixiCtx = pixiCanvas.getContext('2d');
+                    let frame = pixiCtx.getImageData(0, 0, canvasWidth, canvasHeight);
+                    //console.log(`Cadre: ${cadre.width}, ${cadre.height}`);
+                    //console.log(`Frame: ${frame.width}, ${frame.height}`);
+                    //const same = cadre.data.length == frame.data.length;
+                    //console.log(`IsSame: ${same}; Cadr: ${cadre.data.length}, Frame: ${frame.data.length}`);
+                    // detect image
+                    let segmentation = yield this.detectBodyPixImage(cadre);
+                    // apply body by mask
+                    let scene = app_1.util.image.combineImagesByMask(frame, cadre, segmentation.data, p => !!p);
+                    //let scene = frame;
+                    // calc frome destination rect
+                    //let dr = this.calcDestRect(this._player, { width: vw, height: vh });
                     // put image data
-                    this._canvasOverlayCtx.putImageData(scene, dr.cx, dr.cy);
+                    (_a = this._canvasOverlayCtx) === null || _a === void 0 ? void 0 : _a.putImageData(scene, dr.cx, dr.cy);
+                    //this._canvasOverlayCtx?.putImageData(scene, 0, 0);
+                    //console.timeEnd('detectionMethod');
                     this._animationTimeoutId = requestAnimationFrame(() => __awaiter(this, void 0, void 0, function* () {
                         yield this.detectionMethod();
                     }));
+                });
+            }
+            loadBodyPixDetector() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const bodyPix = window.bodyPix;
+                    const net = yield bodyPix.load();
+                    return net;
+                });
+            }
+            detectBodyPixImage(imgData) {
+                var _a;
+                return __awaiter(this, void 0, void 0, function* () {
+                    const segmentation = yield ((_a = this._bodyPix) === null || _a === void 0 ? void 0 : _a.segmentPerson(imgData, {
+                        flipHorizontal: false,
+                        internalResolution: 'medium',
+                        segmentationThreshold: 0.7
+                    }));
+                    return segmentation;
                 });
             }
         }
