@@ -430,7 +430,29 @@ namespace app.media {
             return detector;
         }
 
-        protected async detectImage<TRES>(imgData: ImageData): Promise<TRES> {
+        protected async loadDetectorWorker() {
+
+            if (this._detector) return;
+
+            this.setWaitCursor(true);
+            this.setLoading(true);
+
+            console.log("Detector worker loading...");
+
+            this._detector = new Worker(this._detectorScript)
+
+            await new Promise((resolve, reject) => {
+                this._detector.onmessage = (_) => {
+                    console.log("Detector worker loaded");
+                    resolve()
+                }
+            })
+
+            this.setLoading(false);
+            this.setWaitCursor(false);
+        }
+
+        protected async detectImageWorker<TRES>(imgData: ImageData): Promise<TRES> {
 
             // post image to detection
             this._detector.postMessage(imgData);
@@ -443,6 +465,8 @@ namespace app.media {
             });
 
         }
+
+  
     }
 
 }

@@ -299,7 +299,25 @@ var app;
                     return detector;
                 });
             }
-            detectImage(imgData) {
+            loadDetectorWorker() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    if (this._detector)
+                        return;
+                    this.setWaitCursor(true);
+                    this.setLoading(true);
+                    console.log("Detector worker loading...");
+                    this._detector = new Worker(this._detectorScript);
+                    yield new Promise((resolve, reject) => {
+                        this._detector.onmessage = (_) => {
+                            console.log("Detector worker loaded");
+                            resolve();
+                        };
+                    });
+                    this.setLoading(false);
+                    this.setWaitCursor(false);
+                });
+            }
+            detectImageWorker(imgData) {
                 return __awaiter(this, void 0, void 0, function* () {
                     // post image to detection
                     this._detector.postMessage(imgData);

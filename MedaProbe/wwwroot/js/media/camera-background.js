@@ -145,10 +145,12 @@ var app;
             }
             startDetection() {
                 return __awaiter(this, void 0, void 0, function* () {
+                    //// load body-pix detector class
+                    //if (!this._bodyPix) {
+                    //    this._bodyPix = await this.loadDetector<BodyPix.IBodyPix>(this.loadBodyPixDetector);
+                    //}
                     // load body-pix detector worker
-                    if (!this._bodyPix) {
-                        this._bodyPix = yield this.loadDetector(this.loadBodyPixDetector);
-                    }
+                    yield this.loadDetectorWorker();
                     // Get overlay canvas
                     this._canvasOverlayCtx = this._overlayVideo.getContext("2d");
                     this._canvasCadreCtx = this._canvasCadre.getContext("2d");
@@ -191,23 +193,22 @@ var app;
                 return __awaiter(this, void 0, void 0, function* () {
                     if (!this._app)
                         return;
-                    if (!this._bodyPix)
-                        return;
+                    //if (!this._bodyPix) return;
                     if (!this._canvasOverlayCtx)
                         return;
                     //console.time('detectionMethod');
                     // source video size
                     const vw = this._video.videoWidth;
                     const vh = this._video.videoHeight;
+                    // video frame adjustments
                     let dr = this.calcDestRect(this._player, { width: vw, height: vh });
-                    //const vwp = this._player.clientWidth;
-                    //const vhp = this._player.clientHeight;
                     // get image data from video stream via PIXI export
                     //let videoCanvas = this._app.renderer.plugins.extract.canvas(this._videoSprite);
                     //let videoCtx = videoCanvas.getContext('2d');
                     //let cadr = videoCtx.getImageData(0, 0, videoCanvas.width, videoCanvas.height);
                     // Export PIXI stage canvas
                     let pixiCanvas = this._app.renderer.plugins.extract.canvas(this._stage);
+                    // Adjust size of result canvas by source camvases 
                     let canvasWidth = Math.min(this._canvasCadre.width, pixiCanvas.width);
                     let canvasHeight = Math.min(this._canvasCadre.height, pixiCanvas.height);
                     // get image data from video stream directly
@@ -216,20 +217,16 @@ var app;
                     // get image data from PIXI stage
                     let pixiCtx = pixiCanvas.getContext('2d');
                     let frame = pixiCtx.getImageData(0, 0, canvasWidth, canvasHeight);
-                    //console.log(`Cadre: ${cadre.width}, ${cadre.height}`);
-                    //console.log(`Frame: ${frame.width}, ${frame.height}`);
-                    //const same = cadre.data.length == frame.data.length;
-                    //console.log(`IsSame: ${same}; Cadr: ${cadre.data.length}, Frame: ${frame.data.length}`);
                     // detect image
-                    let segmentation = yield this.detectBodyPixImage(cadre);
+                    //let segmentation = await this.detectBodyPixImage(cadre);
+                    let segmentation = yield this.detectImageWorker(cadre);
                     // apply body by mask
-                    let scene = app_1.util.image.combineImagesByMask(frame, cadre, segmentation.data, p => !!p);
+                    let scene = segmentation && segmentation.data ?
+                        app_1.util.image.combineImagesByMask(frame, cadre, segmentation.data, p => !!p) :
+                        frame;
                     //let scene = frame;
-                    // calc frome destination rect
-                    //let dr = this.calcDestRect(this._player, { width: vw, height: vh });
                     // put image data
                     (_a = this._canvasOverlayCtx) === null || _a === void 0 ? void 0 : _a.putImageData(scene, dr.cx, dr.cy);
-                    //this._canvasOverlayCtx?.putImageData(scene, 0, 0);
                     //console.timeEnd('detectionMethod');
                     this._animationTimeoutId = requestAnimationFrame(() => __awaiter(this, void 0, void 0, function* () {
                         yield this.detectionMethod();

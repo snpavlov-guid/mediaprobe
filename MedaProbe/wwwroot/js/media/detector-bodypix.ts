@@ -20,7 +20,7 @@
 
     console.log(`${workerName}: model loaded`)
 
-    ctx.postMessage({ bodyPix: net });
+    ctx.postMessage({});
 
     ctx.onmessage = async (ev) => {
 
