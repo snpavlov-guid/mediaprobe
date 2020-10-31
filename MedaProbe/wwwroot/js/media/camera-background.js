@@ -89,7 +89,7 @@ var app;
                 var displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite, 50);
                 // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
                 displacementFilter.autoFit = false;
-                this._stage.filters = [blurFilter];
+                //this._stage.filters = [blurFilter];
                 //this._stage.filters = [displacementFilter];
             }
             onVideoCanPlay(ev) {

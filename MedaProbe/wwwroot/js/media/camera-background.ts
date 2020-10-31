@@ -140,7 +140,7 @@ namespace app.media {
             // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
             displacementFilter.autoFit = false;
 
-            this._stage.filters = [blurFilter];
+            //this._stage.filters = [blurFilter];
             //this._stage.filters = [displacementFilter];
 
         }

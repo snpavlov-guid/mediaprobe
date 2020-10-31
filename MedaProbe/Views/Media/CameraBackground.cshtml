@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="~/css/common/general.css" />
     <link rel="stylesheet" href="~/css/common/loading.css" />
     <link rel="stylesheet" href="~/css/media/media.css" />
+    <link rel="stylesheet" href="~/css/media/presets.css" />1
 
     <!-- Load TensorFlow.js -->
     <!--<script src="https://cdn.jsdelivr.net/npm/@@tensorflow/tfjs@1.2"></script>-->
@@ -67,8 +68,9 @@
 
         </div>
 
-        <div class="video-detect d-none">
-            <canvas id="source-canvas"></canvas>
+        <div class="video-preset">
+            <h3>Background</h3>
+            <partial name="Forms/_BackgroundList" />
         </div>
 
     </section>

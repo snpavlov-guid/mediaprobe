@@ -26,7 +26,7 @@
 
         const segmentation = await net.segmentPerson(ev.data, {
             flipHorizontal: false,
-            internalResolution: 'medium',
+            internalResolution: 'low',
             segmentationThreshold: 0.7
         });
 

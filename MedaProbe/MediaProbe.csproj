@@ -38,8 +38,8 @@
 
   <ItemGroup>
     <Folder Include="Areas\" />
-    <Folder Include="wwwroot\img\" />
     <Folder Include="wwwroot\img\liquids\" />
+    <Folder Include="wwwroot\img\camera\" />
     <Folder Include="wwwroot\lib\pixi\" />
     <Folder Include="wwwroot\media\" />
   </ItemGroup>
