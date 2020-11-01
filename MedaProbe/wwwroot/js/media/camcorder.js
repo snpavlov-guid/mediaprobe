@@ -351,6 +351,39 @@ var app;
             }
         };
         media.CamcorderBase = CamcorderBase;
+        class Behaviors {
+            static calcDestRect(view, cadre, contains = true) {
+                let rect = { cx: 0, cy: 0, cw: 0, ch: 0 };
+                let wkf = view.clientWidth / cadre.width;
+                let hkf = view.clientHeight / cadre.height;
+                let kt = contains ?
+                    (wkf < hkf ? wkf : hkf) :
+                    (wkf > hkf ? wkf : hkf);
+                rect.cw = cadre.width * kt;
+                rect.ch = cadre.height * kt;
+                if (wkf < hkf)
+                    rect.cy = (view.clientHeight - rect.ch) / 2;
+                else
+                    rect.cx = (view.clientWidth - rect.cw) / 2;
+                return rect;
+            }
+            static calcSpriteScale(view, cadre) {
+                const result = {};
+                const wkf = view.clientWidth / cadre.width;
+                const hkf = view.clientHeight / cadre.height;
+                const kt = wkf > hkf ? wkf : hkf;
+                result.scale = new PIXI.Point(kt, kt);
+                result.offset = new PIXI.Point();
+                const cw = cadre.width * kt;
+                const ch = cadre.height * kt;
+                if (wkf > hkf)
+                    result.offset.y = (view.clientHeight - ch) / 2;
+                else
+                    result.offset.x = (view.clientWidth - cw) / 2;
+                return result;
+            }
+        }
+        media.Behaviors = Behaviors;
     })(media = app.media || (app.media = {}));
 })(app || (app = {}));
 //# sourceMappingURL=camcorder.js.map

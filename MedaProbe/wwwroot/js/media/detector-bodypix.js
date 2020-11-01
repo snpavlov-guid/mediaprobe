@@ -25,7 +25,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     ctx.onmessage = (ev) => __awaiter(this, void 0, void 0, function* () {
         const segmentation = yield net.segmentPerson(ev.data, {
             flipHorizontal: false,
-            internalResolution: 'low',
+            internalResolution: 'medium',
             segmentationThreshold: 0.7
         });
         ctx.postMessage(segmentation);

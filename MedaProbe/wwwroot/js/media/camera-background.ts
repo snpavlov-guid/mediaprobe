@@ -5,13 +5,22 @@ namespace app.media {
         displacementImage: string,
     }
 
+    export interface IPixiStage {
+        update();
+        resize(view: HTMLElement);
+        setVisibility(visible: boolean);
+        destroy();
+    }
+
     export class CameraBackground extends CamcorderBase {
 
         protected _app: PIXI.Application;
         protected _stage: PIXI.Container;
-        protected _videoTexture: PIXI.Texture;
-        protected _videoSprite: PIXI.Sprite;
         protected _ticker: PIXI.Ticker;
+
+        protected _pixiStages: { [key: string]: IPixiStage };
+
+        protected _activeStage: IPixiStage;
 
         protected _displacementImageUrl: string;
         protected _displacementSprite: PIXI.Sprite;
@@ -21,6 +30,8 @@ namespace app.media {
 
         protected _canvasCadre: HTMLCanvasElement;
         protected _canvasCadreCtx: CanvasRenderingContext2D;
+
+        protected _backgroundList: HTMLUListElement;
 
         protected _animationTimeoutId: number;
 
@@ -37,12 +48,18 @@ namespace app.media {
 
             this._animationTimeoutId = 0;
 
+            this._pixiStages = {};
+
             this._canvasCadre = this._element.querySelector('.video-player #cadre'); 
+
+            this._backgroundList = this._element.querySelector('.background-list');
 
             // add video events
             this._video.addEventListener("play", ev => this.onVideoPlay(ev));
 
             this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
+
+            this._backgroundList.addEventListener("change", ev => { this.doBackgroundCommand(ev) });
         }
 
         protected createPixi() {
@@ -52,6 +69,9 @@ namespace app.media {
 
             // initialize PIXI app when player is ready to play
             this.initializePixi();
+
+            // initialize PIXI stage sprites
+            this.initializePixiStages();
 
             // resize the player and PIXI's video texture
             this.resizePlayer();
@@ -74,6 +94,12 @@ namespace app.media {
             this._app = null;
             this._ticker = null;
 
+            //for (let key in this._pixiStages) {
+            //    this._pixiStages[key].destroy();
+            //}
+
+            //this._pixiStages = {};
+
             ticker.stop();
             ticker.destroy();
 
@@ -88,14 +114,6 @@ namespace app.media {
             // create the root of the scene graph
             this._stage = new PIXI.Container();
 
-            // create a video texture from a path
-            this._videoTexture = PIXI.Texture.from(this._video);
-
-            // create a new Sprite using the video texture (yes it's that easy)
-            this._videoSprite = new PIXI.Sprite(this._videoTexture);
-
-            this._stage.addChild(this._videoSprite);
-
             // create PIXI ticker
             this._ticker = new PIXI.Ticker();
 
@@ -103,11 +121,36 @@ namespace app.media {
 
         }
 
+        protected initializePixiStages() {
+
+            // Find selected background option
+            const radio = <HTMLInputElement>this._backgroundList.querySelector('li input[type=radio]:checked');
+            const value = radio?.value;
+            let key = PixiVideoStage.SpriteName;
+
+            // Createv video sprite
+            this._pixiStages[key] = new PixiVideoStage(this._stage, this._video, false);
+
+            // create bk image selected 
+            if (value == PixiBroadsheet.SpriteName) {
+                key = PixiBroadsheet.SpriteName;
+                const li = app.util.dom.closest(radio, "ul.background-list li");
+                const img = <HTMLImageElement>li.querySelector("img.content");
+                this._pixiStages[key] = new PixiBroadsheet(this._stage, this._video, img, false);
+            }
+
+            this._activeStage = this._pixiStages[key];
+            this._activeStage.setVisibility(true);
+        }
+
         protected animatePixi() {
 
             // render the stage
             this._ticker.add((delta) => {
-                this._videoTexture.update();
+
+                // stage update operations for animation
+                this._activeStage.update();
+
 
                 if (this._displacementSprite && !this._video.paused) {
                         this._displacementSprite.x += 0.75 * delta;
@@ -173,18 +216,8 @@ namespace app.media {
             // resize renderer
             if (this._app) {
                 this._app.renderer.resize(this._player.clientWidth, this._player.clientHeight);
-
-                const vw = this._video.videoWidth;
-                const vh = this._video.videoHeight;
-
-                // calc frome destination rect
-                let dr = this.calcDestRect(this._player, { width: vw, height: vh });
-
-                this._videoSprite.x = dr.cx;
-                this._videoSprite.y = dr.cy;
-
-                this._videoSprite.width = dr.cw; 
-                this._videoSprite.height = dr.ch;
+    
+                this._activeStage.resize(this._player);
 
             }
 
@@ -356,8 +389,181 @@ namespace app.media {
 
         }
 
+        // region Backgrounds
+        protected doBackgroundCommand(ev: Event) {
+
+            if (!this._app) return;
+
+            if (app.util.dom.filterEvent(ev, "ul.background-list li input[type=radio]")) {
+                const li = app.util.dom.closest(<HTMLElement>ev.target, "ul.background-list li");
+                const radio = <HTMLInputElement>li.querySelector("input[type=radio]");
+                const value = radio.value;
+
+                let selectedStage: IPixiStage;
+
+                if (value == PixiVideoStage.SpriteName) {
+                    selectedStage = this._pixiStages[PixiVideoStage.SpriteName];
+
+                } else if (value == PixiBroadsheet.SpriteName) {
+                    const img = <HTMLImageElement>li.querySelector("img.content");
+                    selectedStage = new PixiBroadsheet(this._stage, this._video, img);
+                    this._pixiStages[PixiBroadsheet.SpriteName] = selectedStage;
+                }
+
+                selectedStage.setVisibility(true);
+                selectedStage.resize(this._player);
+
+                this._activeStage.setVisibility(false);
+                this._activeStage = selectedStage;
+               
+            }
+
+        }
          
     }
 
+
+    export class PixiVideoStage implements IPixiStage {
+
+        protected _video: HTMLVideoElement;
+        protected _videoTexture: PIXI.Texture;
+        protected _videoSprite: PIXI.Sprite;
+
+        public static SpriteName = "video";
+
+        constructor(stage: PIXI.Container, video: HTMLVideoElement, visibility: boolean = true) {
+            this._video = video;
+            this.init(stage, video);
+            this.setVisibility(visibility);
+        }
+ 
+        protected init(stage: PIXI.Container, video: HTMLVideoElement) {
+
+            // create a video texture from a path
+            this._videoTexture = PIXI.Texture.from(video);
+
+            // create a new Sprite using the video texture (yes it's that easy)
+            this._videoSprite = new PIXI.Sprite(this._videoTexture);
+            this._videoSprite.name = PixiVideoStage.SpriteName;
+
+            stage.addChild(this._videoSprite);
+        }
+
+        // region Interface IPixiStage
+
+        setVisibility(visible: boolean) {
+            this._videoSprite.visible = visible;
+
+            this._videoSprite.scale.x = visible ? 1 : 0;
+            this._videoSprite.scale.y = visible ? 1 : 0;
+        }
+
+        update() {
+            this._videoTexture.update();
+        }
+
+        resize(view: HTMLElement) {
+
+            const size: ISize = {
+                width: this._video.videoWidth,
+                height: this._video.videoHeight,
+            };
+
+            // calc frome destination rect
+            const dr = Behaviors.calcDestRect(view, size);
+
+            this._videoSprite.x = dr.cx;
+            this._videoSprite.y = dr.cy;
+
+            this._videoSprite.width = dr.cw;
+            this._videoSprite.height = dr.ch;
+
+        }
+
+        destroy() {
+            this._videoSprite.destroy({ children: true, texture: true, baseTexture:true });
+        }
+
+        // endregion
+
+    } 
+
+    export class PixiBroadsheet implements IPixiStage {
+
+        protected _video: HTMLVideoElement;
+        protected _image: HTMLImageElement;
+        protected _imageTexture: PIXI.Texture;
+        protected _imageSprite: PIXI.Sprite;
+
+        public static SpriteName = "image";
+
+        constructor(stage: PIXI.Container, video: HTMLVideoElement, image: HTMLImageElement, visibility: boolean = true) {
+            this._video = video;
+            this._image = image;
+            this.init(stage, image);
+            this.setVisibility(visibility);
+        }
+ 
+        protected init(stage: PIXI.Container, image: HTMLImageElement) {
+
+            this._imageTexture = PIXI.Texture.from(image);
+            this._imageTexture.baseTexture.setSize(image.naturalWidth, image.naturalHeight);
+
+            this._imageSprite = new PIXI.Sprite(this._imageTexture);
+
+            stage.addChild(this._imageSprite);
+        }
+
+        // region Interface IPixiStage
+
+        setVisibility(visible: boolean) {
+            this._imageSprite.visible = visible;
+        }
+
+        update() {
+            // no update required
+        }
+
+        resize(view: HTMLElement) {
+
+            const size: ISize = {
+                width: this._imageSprite.width,
+                height: this._imageSprite.height,
+            };
+
+            // calc frome destination rect
+            const dr = Behaviors.calcDestRect(view, size, false);
+
+            this._imageSprite.x = dr.cx;
+            this._imageSprite.y = dr.cy;
+
+            this._imageSprite.width = dr.cw;
+            this._imageSprite.height = dr.ch;
+
+
+            // clip sprite by video borders
+            const vsize: ISize = {
+                width: this._video.videoWidth,
+                height: this._video.videoHeight,
+            };
+
+            // calc frome destination rect
+            const vdr = Behaviors.calcDestRect(view, vsize);
+
+            const mask = new PIXI.Graphics()
+            mask.beginFill(0x000000)
+            mask.drawRect(vdr.cx + dr.cx, vdr.cy + dr.cy, vdr.cw, vdr.ch);
+            this._imageSprite.mask = mask;
+
+        }
+
+        destroy() {
+            this._imageSprite.destroy({ children: true, texture: true, baseTexture: true });
+        }
+
+        // endregion
+
+
+    }
 
 }

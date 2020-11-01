@@ -23,10 +23,13 @@ var app;
                 return __awaiter(this, void 0, void 0, function* () {
                     _super.setupComponent.call(this);
                     this._animationTimeoutId = 0;
+                    this._pixiStages = {};
                     this._canvasCadre = this._element.querySelector('.video-player #cadre');
+                    this._backgroundList = this._element.querySelector('.background-list');
                     // add video events
                     this._video.addEventListener("play", ev => this.onVideoPlay(ev));
                     this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
+                    this._backgroundList.addEventListener("change", ev => { this.doBackgroundCommand(ev); });
                 });
             }
             createPixi() {
@@ -35,6 +38,8 @@ var app;
                     return;
                 // initialize PIXI app when player is ready to play
                 this.initializePixi();
+                // initialize PIXI stage sprites
+                this.initializePixiStages();
                 // resize the player and PIXI's video texture
                 this.resizePlayer();
                 // TODO: add filters
@@ -49,6 +54,10 @@ var app;
                 var ticker = this._ticker;
                 this._app = null;
                 this._ticker = null;
+                //for (let key in this._pixiStages) {
+                //    this._pixiStages[key].destroy();
+                //}
+                //this._pixiStages = {};
                 ticker.stop();
                 ticker.destroy();
                 app.destroy(false, { children: true, texture: true, baseTexture: true });
@@ -57,19 +66,32 @@ var app;
                 this._app = new PIXI.Application({ view: this._canvasVideo, transparent: true });
                 // create the root of the scene graph
                 this._stage = new PIXI.Container();
-                // create a video texture from a path
-                this._videoTexture = PIXI.Texture.from(this._video);
-                // create a new Sprite using the video texture (yes it's that easy)
-                this._videoSprite = new PIXI.Sprite(this._videoTexture);
-                this._stage.addChild(this._videoSprite);
                 // create PIXI ticker
                 this._ticker = new PIXI.Ticker();
                 this._ticker.autoStart = true;
             }
+            initializePixiStages() {
+                // Find selected background option
+                const radio = this._backgroundList.querySelector('li input[type=radio]:checked');
+                const value = radio === null || radio === void 0 ? void 0 : radio.value;
+                let key = PixiVideoStage.SpriteName;
+                // Createv video sprite
+                this._pixiStages[key] = new PixiVideoStage(this._stage, this._video, false);
+                // create bk image selected 
+                if (value == PixiBroadsheet.SpriteName) {
+                    key = PixiBroadsheet.SpriteName;
+                    const li = app.util.dom.closest(radio, "ul.background-list li");
+                    const img = li.querySelector("img.content");
+                    this._pixiStages[key] = new PixiBroadsheet(this._stage, this._video, img, false);
+                }
+                this._activeStage = this._pixiStages[key];
+                this._activeStage.setVisibility(true);
+            }
             animatePixi() {
                 // render the stage
                 this._ticker.add((delta) => {
-                    this._videoTexture.update();
+                    // stage update operations for animation
+                    this._activeStage.update();
                     if (this._displacementSprite && !this._video.paused) {
                         this._displacementSprite.x += 0.75 * delta;
                         this._displacementSprite.y += 0.75;
@@ -112,14 +134,7 @@ var app;
                 // resize renderer
                 if (this._app) {
                     this._app.renderer.resize(this._player.clientWidth, this._player.clientHeight);
-                    const vw = this._video.videoWidth;
-                    const vh = this._video.videoHeight;
-                    // calc frome destination rect
-                    let dr = this.calcDestRect(this._player, { width: vw, height: vh });
-                    this._videoSprite.x = dr.cx;
-                    this._videoSprite.y = dr.cy;
-                    this._videoSprite.width = dr.cw;
-                    this._videoSprite.height = dr.ch;
+                    this._activeStage.resize(this._player);
                 }
             }
             setImageCaptureSize() {
@@ -251,8 +266,121 @@ var app;
                     return segmentation;
                 });
             }
+            // region Backgrounds
+            doBackgroundCommand(ev) {
+                if (!this._app)
+                    return;
+                if (app.util.dom.filterEvent(ev, "ul.background-list li input[type=radio]")) {
+                    const li = app.util.dom.closest(ev.target, "ul.background-list li");
+                    const radio = li.querySelector("input[type=radio]");
+                    const value = radio.value;
+                    let selectedStage;
+                    if (value == PixiVideoStage.SpriteName) {
+                        selectedStage = this._pixiStages[PixiVideoStage.SpriteName];
+                    }
+                    else if (value == PixiBroadsheet.SpriteName) {
+                        const img = li.querySelector("img.content");
+                        selectedStage = new PixiBroadsheet(this._stage, this._video, img);
+                        this._pixiStages[PixiBroadsheet.SpriteName] = selectedStage;
+                    }
+                    selectedStage.setVisibility(true);
+                    selectedStage.resize(this._player);
+                    this._activeStage.setVisibility(false);
+                    this._activeStage = selectedStage;
+                }
+            }
         }
         media.CameraBackground = CameraBackground;
+        class PixiVideoStage {
+            constructor(stage, video, visibility = true) {
+                this._video = video;
+                this.init(stage, video);
+                this.setVisibility(visibility);
+            }
+            init(stage, video) {
+                // create a video texture from a path
+                this._videoTexture = PIXI.Texture.from(video);
+                // create a new Sprite using the video texture (yes it's that easy)
+                this._videoSprite = new PIXI.Sprite(this._videoTexture);
+                this._videoSprite.name = PixiVideoStage.SpriteName;
+                stage.addChild(this._videoSprite);
+            }
+            // region Interface IPixiStage
+            setVisibility(visible) {
+                this._videoSprite.visible = visible;
+                this._videoSprite.scale.x = visible ? 1 : 0;
+                this._videoSprite.scale.y = visible ? 1 : 0;
+            }
+            update() {
+                this._videoTexture.update();
+            }
+            resize(view) {
+                const size = {
+                    width: this._video.videoWidth,
+                    height: this._video.videoHeight,
+                };
+                // calc frome destination rect
+                const dr = media.Behaviors.calcDestRect(view, size);
+                this._videoSprite.x = dr.cx;
+                this._videoSprite.y = dr.cy;
+                this._videoSprite.width = dr.cw;
+                this._videoSprite.height = dr.ch;
+            }
+            destroy() {
+                this._videoSprite.destroy({ children: true, texture: true, baseTexture: true });
+            }
+        }
+        PixiVideoStage.SpriteName = "video";
+        media.PixiVideoStage = PixiVideoStage;
+        class PixiBroadsheet {
+            constructor(stage, video, image, visibility = true) {
+                this._video = video;
+                this._image = image;
+                this.init(stage, image);
+                this.setVisibility(visibility);
+            }
+            init(stage, image) {
+                this._imageTexture = PIXI.Texture.from(image);
+                this._imageTexture.baseTexture.setSize(image.naturalWidth, image.naturalHeight);
+                this._imageSprite = new PIXI.Sprite(this._imageTexture);
+                stage.addChild(this._imageSprite);
+            }
+            // region Interface IPixiStage
+            setVisibility(visible) {
+                this._imageSprite.visible = visible;
+            }
+            update() {
+                // no update required
+            }
+            resize(view) {
+                const size = {
+                    width: this._imageSprite.width,
+                    height: this._imageSprite.height,
+                };
+                // calc frome destination rect
+                const dr = media.Behaviors.calcDestRect(view, size, false);
+                this._imageSprite.x = dr.cx;
+                this._imageSprite.y = dr.cy;
+                this._imageSprite.width = dr.cw;
+                this._imageSprite.height = dr.ch;
+                // clip sprite by video borders
+                const vsize = {
+                    width: this._video.videoWidth,
+                    height: this._video.videoHeight,
+                };
+                // calc frome destination rect
+                const vdr = media.Behaviors.calcDestRect(view, vsize);
+                const mask = new PIXI.Graphics();
+                mask.beginFill(0x000000);
+                mask.drawRect(vdr.cx + dr.cx, vdr.cy + dr.cy, vdr.cw, vdr.ch);
+                this._imageSprite.mask = mask;
+            }
+            destroy() {
+                this._imageSprite.destroy({ children: true, texture: true, baseTexture: true });
+            }
+        }
+        PixiBroadsheet.SpriteName = "image";
+        media.PixiBroadsheet = PixiBroadsheet;
     })(media = app_1.media || (app_1.media = {}));
 })(app || (app = {}));
 //# sourceMappingURL=camera-background.js.map

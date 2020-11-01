@@ -12,6 +12,19 @@ namespace app.media {
         title: string,
     }
 
+    export interface ISize {
+        width: number,
+        height: number
+    }
+
+    export interface IOffsetSize {
+        cx: number,
+        cy: number,
+        cw: number,
+        ch: number
+    }
+   
+
     export class CamcorderBase {
 
         protected _navigator: Navigator;
@@ -469,4 +482,55 @@ namespace app.media {
   
     }
 
+    export class Behaviors {
+
+        public static calcDestRect(view: HTMLElement, cadre: ISize, contains: boolean = true): IOffsetSize {
+            let rect = { cx: 0, cy: 0, cw: 0, ch: 0 };
+
+            let wkf = view.clientWidth / cadre.width;
+            let hkf = view.clientHeight / cadre.height;
+
+            let kt = contains ?
+                (wkf < hkf ? wkf : hkf) :
+                (wkf > hkf ? wkf : hkf);
+
+            rect.cw = cadre.width * kt;
+            rect.ch = cadre.height * kt;
+
+            if (wkf < hkf)
+                rect.cy = (view.clientHeight - rect.ch) / 2;
+            else
+                rect.cx = (view.clientWidth - rect.cw) / 2;
+
+            return rect;
+        }
+
+        public static calcSpriteScale(view: HTMLElement, cadre: ISize):
+            { scale: PIXI.Point, offset: PIXI.Point } {
+            const result = <{ scale: PIXI.Point, offset: PIXI.Point }>{};
+
+            const wkf = view.clientWidth / cadre.width;
+            const hkf = view.clientHeight / cadre.height;
+
+            const kt = wkf > hkf ? wkf : hkf;
+
+            result.scale = new PIXI.Point(kt, kt);
+            result.offset = new PIXI.Point();
+
+            const cw = cadre.width * kt;
+            const ch = cadre.height * kt;
+
+            if (wkf > hkf)
+                result.offset.y = (view.clientHeight - ch) / 2;
+            else
+                result.offset.x = (view.clientWidth - cw) / 2;
+
+            return result;
+
+        }
+
+    }
+
+
+  
 }
