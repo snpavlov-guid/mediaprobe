@@ -32,6 +32,7 @@ namespace app.media {
         protected _canvasCadreCtx: CanvasRenderingContext2D;
 
         protected _backgroundList: HTMLUListElement;
+        protected _uploadImage: HTMLInputElement;
 
         protected _animationTimeoutId: number;
 
@@ -53,13 +54,18 @@ namespace app.media {
             this._canvasCadre = this._element.querySelector('.video-player #cadre'); 
 
             this._backgroundList = this._element.querySelector('.background-list');
+            this._uploadImage = this._backgroundList.querySelector('.upload input[type=file]');
 
             // add video events
             this._video.addEventListener("play", ev => this.onVideoPlay(ev));
 
             this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
 
-            this._backgroundList.addEventListener("change", ev => { this.doBackgroundCommand(ev) });
+            this._backgroundList.addEventListener("change", ev => { this.doBackgroundApply(ev) });
+
+            this._backgroundList.addEventListener("click", ev => { this.doBackgroundCommand(ev) });
+
+            this._uploadImage.addEventListener("change", ev => { this.doBackgroundUpload(ev) });
         }
 
         protected createPixi() {
@@ -390,7 +396,7 @@ namespace app.media {
         }
 
         // region Backgrounds
-        protected doBackgroundCommand(ev: Event) {
+        protected doBackgroundApply(ev: Event) {
 
             if (!this._app) return;
 
@@ -418,6 +424,50 @@ namespace app.media {
                
             }
 
+        }
+
+        protected doBackgroundUpload(ev: Event) {
+            const upload = <HTMLInputElement>ev.target;
+            if (!upload.files.length) return;
+
+            const li = app.util.dom.closest(upload, "ul.background-list li");
+            const template = <HTMLTemplateElement>document.querySelector("#templates #background-item");
+            const item = <DocumentFragment>template.content.cloneNode(true);
+            const img = <HTMLImageElement>item.querySelector("img.content");
+            const radio = <HTMLInputElement>item.querySelector("input[type=radio]");
+            this._backgroundList.insertBefore(item, li);
+
+            const reader = new FileReader();
+            reader.addEventListener('load', (event) => {
+                // Set image content
+                img.src = <string>event.target.result;
+
+                // Set radio value and trigger radio change event
+                radio.checked = true;
+                radio.dispatchEvent(new Event('change', { bubbles: true }));
+
+            });
+            reader.readAsDataURL(upload.files[0]);
+
+        }
+
+        protected doBackgroundCommand(ev: Event) {
+
+            if (app.util.dom.filterEvent(ev, "ul.background-list li button.item-remove")) {
+                const li = app.util.dom.closest(<HTMLElement>ev.target, "ul.background-list li");
+                const radio = <HTMLInputElement>li.querySelector("input[type=radio]");
+                const rvideo = <HTMLInputElement>this._backgroundList.querySelector("ul.background-list li input[value=video]");
+
+                if (li && confirm("You are about to remove background?")) {
+                    if (radio.checked) {
+                        // Set radio value and trigger radio change event
+                        rvideo.checked = true;
+                        rvideo.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                    li.remove();
+                }
+
+            }
         }
          
     }

@@ -26,10 +26,13 @@ var app;
                     this._pixiStages = {};
                     this._canvasCadre = this._element.querySelector('.video-player #cadre');
                     this._backgroundList = this._element.querySelector('.background-list');
+                    this._uploadImage = this._backgroundList.querySelector('.upload input[type=file]');
                     // add video events
                     this._video.addEventListener("play", ev => this.onVideoPlay(ev));
                     this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
-                    this._backgroundList.addEventListener("change", ev => { this.doBackgroundCommand(ev); });
+                    this._backgroundList.addEventListener("change", ev => { this.doBackgroundApply(ev); });
+                    this._backgroundList.addEventListener("click", ev => { this.doBackgroundCommand(ev); });
+                    this._uploadImage.addEventListener("change", ev => { this.doBackgroundUpload(ev); });
                 });
             }
             createPixi() {
@@ -267,7 +270,7 @@ var app;
                 });
             }
             // region Backgrounds
-            doBackgroundCommand(ev) {
+            doBackgroundApply(ev) {
                 if (!this._app)
                     return;
                 if (app.util.dom.filterEvent(ev, "ul.background-list li input[type=radio]")) {
@@ -287,6 +290,41 @@ var app;
                     selectedStage.resize(this._player);
                     this._activeStage.setVisibility(false);
                     this._activeStage = selectedStage;
+                }
+            }
+            doBackgroundUpload(ev) {
+                const upload = ev.target;
+                if (!upload.files.length)
+                    return;
+                const li = app.util.dom.closest(upload, "ul.background-list li");
+                const template = document.querySelector("#templates #background-item");
+                const item = template.content.cloneNode(true);
+                const img = item.querySelector("img.content");
+                const radio = item.querySelector("input[type=radio]");
+                this._backgroundList.insertBefore(item, li);
+                const reader = new FileReader();
+                reader.addEventListener('load', (event) => {
+                    // Set image content
+                    img.src = event.target.result;
+                    // Set radio value and trigger radio change event
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+                reader.readAsDataURL(upload.files[0]);
+            }
+            doBackgroundCommand(ev) {
+                if (app.util.dom.filterEvent(ev, "ul.background-list li button.item-remove")) {
+                    const li = app.util.dom.closest(ev.target, "ul.background-list li");
+                    const radio = li.querySelector("input[type=radio]");
+                    const rvideo = this._backgroundList.querySelector("ul.background-list li input[value=video]");
+                    if (li && confirm("You are about to remove background?")) {
+                        if (radio.checked) {
+                            // Set radio value and trigger radio change event
+                            rvideo.checked = true;
+                            rvideo.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                        li.remove();
+                    }
                 }
             }
         }

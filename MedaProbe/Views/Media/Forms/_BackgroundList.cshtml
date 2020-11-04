@@ -50,7 +50,15 @@
             <span class="tick-frame"></span>
         </label>
     </li>
-    <li class="bk-broadsheet upload">
-        <div class="content"></div>
+    <li class="bk-broadsheet">
+        <div class="content">
+            <div class="upload">
+                <button class="btn btn-light" title="Upload image" 
+                        onclick="javascript: this.parentNode.querySelector('input[type=file]').click()">
+                    Upload
+                </button>
+                <input type="file" accept="image/*" />
+            </div>
+        </div>
     </li>
 </ul>

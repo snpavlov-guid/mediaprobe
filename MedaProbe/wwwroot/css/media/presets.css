@@ -37,7 +37,8 @@ ul.background-list li.bk-broadsheet {
 
 .bk-broadsheet label,
 .bk-broadsheet .content,
-.bk-broadsheet .tick-frame {
+.bk-broadsheet .tick-frame,
+.bk-broadsheet .ctrl-frame {
     position: absolute;
     top: 0;
     left: 0;
@@ -73,7 +74,7 @@ ul.background-list li.bk-broadsheet {
     font-size: 16px;
     color: rgba(0, 0, 0, 0.3);
     text-shadow: 4px 4px 8px rgba(255,255,255,0.71);
-    white-space:nowrap;
+    white-space: nowrap;
 }
 
 .bk-broadsheet .tick-frame {
@@ -93,7 +94,7 @@ ul.background-list li.bk-broadsheet {
     content: "";
     position: absolute;
     top: 4%;
-    right: 4%;
+    left: 4%;
     width: 20px;
     height: 20px;
     border: solid 1px darkgray;
@@ -110,10 +111,81 @@ ul.background-list li.bk-broadsheet {
     background-color: lightgray;
 }
 
+.bk-broadsheet .ctrl-frame {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    opacity: 0;
+    transition: opacity ease-out 200ms;
+    padding: 4%;
+}
+
+.bk-broadsheet .ctrl-frame:hover {
+     opacity: 1;
+}
+
+
+.bk-broadsheet .ctrl-frame button {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    outline: none;
+}
+
+.bk-broadsheet .ctrl-frame button:hover {
+    background-color: #efefef;
+}
+
+.bk-broadsheet .ctrl-frame button:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 3px 3px;
+}
+
+.bk-broadsheet .ctrl-frame button.item-remove:after {
+    content: "";
+    background-image: url(/img/feather-x.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+
+.bk-broadsheet .content .upload {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Lato', sans-serif;
+}
+
+.upload input {
+    display: none;
+}
+
+.upload button {
+    color: rgba(0, 0, 0, 0.3);
+    border: solid 1px #adb5bd;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0,0,0, 0.21);
+    background-image: linear-gradient(to right bottom, var(--light), lightgray);
+}
+
+.upload button:hover {
+    color: rgba(0, 0, 0, 0.5);
+}
+
 
 @media (max-width: 1200px) {
-
-    ul.background-list li.bk-broadsheet {
+    ul .background-list li.bk-broadsheet {
         min-width: 160px;
         width: 160px;
         height: 120px;
@@ -143,6 +215,11 @@ ul.background-list li.bk-broadsheet {
         font-size: 14px;
         line-height: 14px;
         padding-left: 2px;
+    }
+
+    .bk-broadsheet .ctrl-frame button {
+        width: 16px;
+        height: 16px;
     }
 }
 
