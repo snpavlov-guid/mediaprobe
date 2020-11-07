@@ -5,7 +5,10 @@ var app;
         class PixiFilterNames {
         }
         PixiFilterNames.BlurFilter = "blur";
+        PixiFilterNames.KawaseBlurFilter = "kawaseblur";
+        PixiFilterNames.MotionBlurFilter = "motionblur";
         PixiFilterNames.DisplacementFilter = "liquid";
+        PixiFilterNames.ShockwaveFilter = "shockwave";
         pixi.PixiFilterNames = PixiFilterNames;
         class PixiFilterManager {
             constructor() {
@@ -46,6 +49,9 @@ var app;
                     this._pixiFilters[name].animate(delta);
                 }
             }
+            resize(filterName, size) {
+                this._pixiFilters[filterName].resize(size);
+            }
         }
         pixi.PixiFilterManager = PixiFilterManager;
         class PixiBlurFilter {
@@ -71,6 +77,9 @@ var app;
                 this._blurFilter.enabled = enabled;
             }
             animate(delta) {
+                // Do nothing
+            }
+            resize(size) {
                 // Do nothing
             }
         }
@@ -104,8 +113,99 @@ var app;
                 this._displacementSprite.x += this._animationOffset.x * delta;
                 this._displacementSprite.y += this._animationOffset.y;
             }
+            resize(size) {
+                // Do nothing
+            }
         }
         pixi.PixiDisplacementFilter = PixiDisplacementFilter;
+        class PixiMotionBlurFilter {
+            constructor(enabled = true) {
+                this.init(enabled);
+            }
+            init(enabled) {
+                this._motionBlurFilter = new PIXI.filters.MotionBlurFilter(new PIXI.Point(50, -50), 21, 0);
+                this._motionBlurFilter.enabled = enabled;
+            }
+            get pixiFilter() {
+                return this._motionBlurFilter;
+            }
+            get enabled() {
+                return this._motionBlurFilter.enabled;
+            }
+            enable(enabled) {
+                this._motionBlurFilter.enabled = enabled;
+            }
+            animate(delta) {
+                // Do nothing
+            }
+            resize(size) {
+                // Do nothing
+            }
+        }
+        pixi.PixiMotionBlurFilter = PixiMotionBlurFilter;
+        class PixiKawaseBlurFilter {
+            constructor(enabled = true) {
+                this.init(enabled);
+            }
+            init(enabled) {
+                this._kawaseBlurFilter = new PIXI.filters.KawaseBlurFilter(10, 10);
+                this._kawaseBlurFilter.enabled = enabled;
+            }
+            get pixiFilter() {
+                return this._kawaseBlurFilter;
+            }
+            get enabled() {
+                return this._kawaseBlurFilter.enabled;
+            }
+            enable(enabled) {
+                this._kawaseBlurFilter.enabled = enabled;
+            }
+            animate(delta) {
+                // Do nothing
+            }
+            resize(size) {
+                // Do nothing
+            }
+        }
+        pixi.PixiKawaseBlurFilter = PixiKawaseBlurFilter;
+        class PixiShockwaveFilter {
+            constructor(enabled = true) {
+                this.init(enabled);
+            }
+            init(enabled) {
+                this._shockwaveOptions = {
+                    amplitude: 50,
+                    wavelength: 200,
+                    brightness: 1.1,
+                    speed: 500,
+                    radius: -1,
+                };
+                this._timeLimit = 2;
+                this._timeStep = 0.01;
+                //this._shockwaveFilter = new PIXI.filters.ShockwaveFilter();
+                this._shockwaveFilter = new PIXI.filters.ShockwaveFilter(new PIXI.Point(0, 0), this._shockwaveOptions, 0);
+                this._shockwaveFilter.enabled = enabled;
+            }
+            get pixiFilter() {
+                return this._shockwaveFilter;
+            }
+            get enabled() {
+                return this._shockwaveFilter.enabled;
+            }
+            enable(enabled) {
+                this._shockwaveFilter.enabled = enabled;
+            }
+            animate(delta) {
+                this._shockwaveFilter.time = (this._shockwaveFilter.time >= this._timeLimit) ?
+                    0 : this._shockwaveFilter.time + this._timeStep;
+            }
+            resize(size) {
+                const center = this._shockwaveFilter.center;
+                center.x = size.cx + size.cw / 2;
+                center.y = size.cy + size.ch / 2;
+            }
+        }
+        pixi.PixiShockwaveFilter = PixiShockwaveFilter;
     })(pixi = app.pixi || (app.pixi = {}));
 })(app || (app = {}));
 //# sourceMappingURL=filters.js.map

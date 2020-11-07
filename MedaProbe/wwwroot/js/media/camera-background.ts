@@ -7,7 +7,7 @@ namespace app.media {
 
     export interface IPixiStage {
         update();
-        resize(view: HTMLElement);
+        resize(view: HTMLElement, onresize?: (IOffsetSize) => void);
         setVisibility(visible: boolean);
         destroy();
     }
@@ -171,6 +171,19 @@ namespace app.media {
             this._pixiFilters.addFilter(pixi.PixiFilterNames.DisplacementFilter,
                 new pixi.PixiDisplacementFilter(this._stage, this._displacementImageUrl, false));
 
+            // Add motion blur filter
+            this._pixiFilters.addFilter(pixi.PixiFilterNames.MotionBlurFilter,
+                new pixi.PixiMotionBlurFilter(false));
+
+            // Add kawase blur filter
+            this._pixiFilters.addFilter(pixi.PixiFilterNames.KawaseBlurFilter,
+                new pixi.PixiKawaseBlurFilter(false));
+
+            // Add kawase blur filter
+            this._pixiFilters.addFilter(pixi.PixiFilterNames.ShockwaveFilter,
+                new pixi.PixiShockwaveFilter(false));
+
+
             // Find selected filter option
             const checkedFilters = this._filterList.querySelectorAll('li input[type=checkbox]:checked');
 
@@ -258,8 +271,12 @@ namespace app.media {
             // resize renderer
             if (this._app) {
                 this._app.renderer.resize(this._player.clientWidth, this._player.clientHeight);
-    
-                this._activeStage.resize(this._player);
+
+                this._activeStage.resize(this._player,
+                    (rect: IOffsetSize) => {
+                        // apply size to filters
+                        this._pixiFilters.resize(pixi.PixiFilterNames.ShockwaveFilter, rect);
+                    });
 
             }
 
@@ -563,7 +580,7 @@ namespace app.media {
             this._videoTexture.update();
         }
 
-        resize(view: HTMLElement) {
+        resize(view: HTMLElement, onresize?: (IOffsetSize) => void) {
 
             const size: ISize = {
                 width: this._video.videoWidth,
@@ -578,6 +595,9 @@ namespace app.media {
 
             this._videoSprite.width = dr.cw;
             this._videoSprite.height = dr.ch;
+
+            // call on resize caller's method
+            if (onresize) onresize(dr);
 
         }
 
@@ -625,7 +645,7 @@ namespace app.media {
             // no update required
         }
 
-        resize(view: HTMLElement) {
+        resize(view: HTMLElement, onresize?: (IOffsetSize) => void) {
 
             const size: ISize = {
                 width: this._imageSprite.width,
@@ -655,6 +675,9 @@ namespace app.media {
             mask.beginFill(0x000000)
             mask.drawRect(vdr.cx + dr.cx, vdr.cy + dr.cy, vdr.cw, vdr.ch);
             this._imageSprite.mask = mask;
+
+            // call on resize caller's method
+            if (onresize) onresize(vdr);
 
         }
 

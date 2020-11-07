@@ -101,6 +101,12 @@ var app;
                 this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.BlurFilter, new app_1.pixi.PixiBlurFilter(false));
                 // Add displacement filter
                 this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.DisplacementFilter, new app_1.pixi.PixiDisplacementFilter(this._stage, this._displacementImageUrl, false));
+                // Add motion blur filter
+                this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.MotionBlurFilter, new app_1.pixi.PixiMotionBlurFilter(false));
+                // Add kawase blur filter
+                this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.KawaseBlurFilter, new app_1.pixi.PixiKawaseBlurFilter(false));
+                // Add kawase blur filter
+                this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.ShockwaveFilter, new app_1.pixi.PixiShockwaveFilter(false));
                 // Find selected filter option
                 const checkedFilters = this._filterList.querySelectorAll('li input[type=checkbox]:checked');
                 const filterNames = [];
@@ -157,7 +163,10 @@ var app;
                 // resize renderer
                 if (this._app) {
                     this._app.renderer.resize(this._player.clientWidth, this._player.clientHeight);
-                    this._activeStage.resize(this._player);
+                    this._activeStage.resize(this._player, (rect) => {
+                        // apply size to filters
+                        this._pixiFilters.resize(app_1.pixi.PixiFilterNames.ShockwaveFilter, rect);
+                    });
                 }
             }
             setImageCaptureSize() {
@@ -382,7 +391,7 @@ var app;
             update() {
                 this._videoTexture.update();
             }
-            resize(view) {
+            resize(view, onresize) {
                 const size = {
                     width: this._video.videoWidth,
                     height: this._video.videoHeight,
@@ -393,6 +402,9 @@ var app;
                 this._videoSprite.y = dr.cy;
                 this._videoSprite.width = dr.cw;
                 this._videoSprite.height = dr.ch;
+                // call on resize caller's method
+                if (onresize)
+                    onresize(dr);
             }
             destroy() {
                 this._videoSprite.destroy({ children: true, texture: true, baseTexture: true });
@@ -420,7 +432,7 @@ var app;
             update() {
                 // no update required
             }
-            resize(view) {
+            resize(view, onresize) {
                 const size = {
                     width: this._imageSprite.width,
                     height: this._imageSprite.height,
@@ -442,6 +454,9 @@ var app;
                 mask.beginFill(0x000000);
                 mask.drawRect(vdr.cx + dr.cx, vdr.cy + dr.cy, vdr.cw, vdr.ch);
                 this._imageSprite.mask = mask;
+                // call on resize caller's method
+                if (onresize)
+                    onresize(vdr);
             }
             destroy() {
                 this._imageSprite.destroy({ children: true, texture: true, baseTexture: true });
