@@ -15,6 +15,7 @@ namespace app.pixi {
         public static readonly MotionBlurFilter: string = "motionblur";
         public static readonly DisplacementFilter: string = "liquid";
         public static readonly ShockwaveFilter: string = "shockwave";
+        public static readonly BulgePinchFilter: string = "fisheye";
     }
 
     export class PixiFilterManager {
@@ -295,5 +296,42 @@ namespace app.pixi {
         }
     }
 
+
+    export class PixiBulgePinchFilter implements IPixiFilter {
+
+        protected _bulgePinchFilter: PIXI.filters.BulgePinchFilter;
+
+        constructor(enabled: boolean = true) {
+            this.init(enabled);
+        }
+
+        protected init(enabled: boolean) {
+            this._bulgePinchFilter = new PIXI.filters.BulgePinchFilter();
+            this._bulgePinchFilter.enabled = enabled;
+            this._bulgePinchFilter.strength = 0.75;
+        }
+
+        get pixiFilter(): PIXI.Filter {
+            return this._bulgePinchFilter;
+        }
+
+        get enabled(): boolean {
+            return this._bulgePinchFilter.enabled;
+        }
+
+        enable(enabled: boolean) {
+            this._bulgePinchFilter.enabled = enabled;
+        }
+
+        animate(delta: number) {
+        }
+
+        resize(size: media.IOffsetSize) {
+            // this._bulgePinchFilter.center is relative value in [0,1]
+            this._bulgePinchFilter.radius = Math.min(size.cw, size.ch) / 2;
+        }
+    }
+
+    //BulgePinchFilter
 
 }

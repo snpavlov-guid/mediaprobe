@@ -32,6 +32,19 @@ declare namespace PIXI.filters {
         radius?: number;
     } 
 
+    export interface BulgePinchFilterOptions {
+        center?: PIXI.Point | [number, number];
+        radius?: number;
+        strength?: number;
+    }
+    export class BulgePinchFilter extends PIXI.Filter {
+        constructor(options?: BulgePinchFilterOptions);
+        constructor(center?: PIXI.Point | [number, number], radius?: number, strength?: number);
+        center: PIXI.Point;
+        radius: number;
+        strength: number;
+    } 
+
 }
 
 declare module "@pixi/filter-motion-blur" {
@@ -39,5 +52,7 @@ declare module "@pixi/filter-motion-blur" {
     export import KawaseBlurFilter = PIXI.filters.KawaseBlurFilter;
     export import ShockwaveFilter = PIXI.filters.ShockwaveFilter;
     export import ShockwaveFilterOptions = PIXI.filters.ShockwaveFilterOptions; 
+    export import BulgePinchFilterOptions = PIXI.filters.BulgePinchFilterOptions;
+    export import BulgePinchFilter = PIXI.filters.BulgePinchFilter; 
 } 
 

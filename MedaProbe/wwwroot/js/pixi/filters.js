@@ -9,6 +9,7 @@ var app;
         PixiFilterNames.MotionBlurFilter = "motionblur";
         PixiFilterNames.DisplacementFilter = "liquid";
         PixiFilterNames.ShockwaveFilter = "shockwave";
+        PixiFilterNames.BulgePinchFilter = "fisheye";
         pixi.PixiFilterNames = PixiFilterNames;
         class PixiFilterManager {
             constructor() {
@@ -206,6 +207,33 @@ var app;
             }
         }
         pixi.PixiShockwaveFilter = PixiShockwaveFilter;
+        class PixiBulgePinchFilter {
+            constructor(enabled = true) {
+                this.init(enabled);
+            }
+            init(enabled) {
+                this._bulgePinchFilter = new PIXI.filters.BulgePinchFilter();
+                this._bulgePinchFilter.enabled = enabled;
+                this._bulgePinchFilter.strength = 0.75;
+            }
+            get pixiFilter() {
+                return this._bulgePinchFilter;
+            }
+            get enabled() {
+                return this._bulgePinchFilter.enabled;
+            }
+            enable(enabled) {
+                this._bulgePinchFilter.enabled = enabled;
+            }
+            animate(delta) {
+            }
+            resize(size) {
+                // this._bulgePinchFilter.center is relative value in [0,1]
+                this._bulgePinchFilter.radius = Math.min(size.cw, size.ch) / 2;
+            }
+        }
+        pixi.PixiBulgePinchFilter = PixiBulgePinchFilter;
+        //BulgePinchFilter
     })(pixi = app.pixi || (app.pixi = {}));
 })(app || (app = {}));
 //# sourceMappingURL=filters.js.map

@@ -105,8 +105,10 @@ var app;
                 this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.MotionBlurFilter, new app_1.pixi.PixiMotionBlurFilter(false));
                 // Add kawase blur filter
                 this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.KawaseBlurFilter, new app_1.pixi.PixiKawaseBlurFilter(false));
-                // Add kawase blur filter
+                // Add shockwave filter
                 this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.ShockwaveFilter, new app_1.pixi.PixiShockwaveFilter(false));
+                // Add shockwave filter
+                this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.BulgePinchFilter, new app_1.pixi.PixiBulgePinchFilter(false));
                 // Find selected filter option
                 const checkedFilters = this._filterList.querySelectorAll('li input[type=checkbox]:checked');
                 const filterNames = [];
@@ -166,6 +168,7 @@ var app;
                     this._activeStage.resize(this._player, (rect) => {
                         // apply size to filters
                         this._pixiFilters.resize(app_1.pixi.PixiFilterNames.ShockwaveFilter, rect);
+                        this._pixiFilters.resize(app_1.pixi.PixiFilterNames.BulgePinchFilter, rect);
                     });
                 }
             }

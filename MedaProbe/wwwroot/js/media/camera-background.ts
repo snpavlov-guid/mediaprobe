@@ -179,9 +179,13 @@ namespace app.media {
             this._pixiFilters.addFilter(pixi.PixiFilterNames.KawaseBlurFilter,
                 new pixi.PixiKawaseBlurFilter(false));
 
-            // Add kawase blur filter
+            // Add shockwave filter
             this._pixiFilters.addFilter(pixi.PixiFilterNames.ShockwaveFilter,
                 new pixi.PixiShockwaveFilter(false));
+
+            // Add shockwave filter
+            this._pixiFilters.addFilter(pixi.PixiFilterNames.BulgePinchFilter,
+                new pixi.PixiBulgePinchFilter(false));
 
 
             // Find selected filter option
@@ -276,6 +280,7 @@ namespace app.media {
                     (rect: IOffsetSize) => {
                         // apply size to filters
                         this._pixiFilters.resize(pixi.PixiFilterNames.ShockwaveFilter, rect);
+                        this._pixiFilters.resize(pixi.PixiFilterNames.BulgePinchFilter, rect);
                     });
 
             }
