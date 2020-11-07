@@ -24,15 +24,20 @@ var app;
                     _super.setupComponent.call(this);
                     this._animationTimeoutId = 0;
                     this._pixiStages = {};
+                    this._pixiFilters = new app_1.pixi.PixiFilterManager();
                     this._canvasCadre = this._element.querySelector('.video-player #cadre');
                     this._backgroundList = this._element.querySelector('.background-list');
                     this._uploadImage = this._backgroundList.querySelector('.upload input[type=file]');
-                    // add video events
+                    this._filterList = this._element.querySelector('.filter-list');
+                    // Video events
                     this._video.addEventListener("play", ev => this.onVideoPlay(ev));
                     this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
+                    // Background list events
                     this._backgroundList.addEventListener("change", ev => { this.doBackgroundApply(ev); });
                     this._backgroundList.addEventListener("click", ev => { this.doBackgroundCommand(ev); });
                     this._uploadImage.addEventListener("change", ev => { this.doBackgroundUpload(ev); });
+                    // Filter list events
+                    this._filterList.addEventListener("change", ev => { this.doFilterApply(ev); });
                 });
             }
             createPixi() {
@@ -43,10 +48,10 @@ var app;
                 this.initializePixi();
                 // initialize PIXI stage sprites
                 this.initializePixiStages();
+                // initialize PIXI filters
+                this.initializePixiFilters();
                 // resize the player and PIXI's video texture
                 this.resizePlayer();
-                // TODO: add filters
-                this.applyPixiFilrer();
                 // start PIXI animation
                 this.animatePixi();
             }
@@ -61,6 +66,7 @@ var app;
                 //    this._pixiStages[key].destroy();
                 //}
                 //this._pixiStages = {};
+                this._pixiFilters.clear();
                 ticker.stop();
                 ticker.destroy();
                 app.destroy(false, { children: true, texture: true, baseTexture: true });
@@ -90,33 +96,47 @@ var app;
                 this._activeStage = this._pixiStages[key];
                 this._activeStage.setVisibility(true);
             }
+            initializePixiFilters() {
+                // Add blur filter
+                this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.BlurFilter, new app_1.pixi.PixiBlurFilter(false));
+                // Add displacement filter
+                this._pixiFilters.addFilter(app_1.pixi.PixiFilterNames.DisplacementFilter, new app_1.pixi.PixiDisplacementFilter(this._stage, this._displacementImageUrl, false));
+                // Find selected filter option
+                const checkedFilters = this._filterList.querySelectorAll('li input[type=checkbox]:checked');
+                const filterNames = [];
+                checkedFilters.forEach(x => filterNames.push(x.value));
+                // enable filters
+                this._pixiFilters.enableFilters(filterNames, true);
+                // set filters to the stage
+                this._stage.filters = this._pixiFilters.getFilters();
+            }
             animatePixi() {
                 // render the stage
                 this._ticker.add((delta) => {
-                    // stage update operations for animation
-                    this._activeStage.update();
-                    if (this._displacementSprite && !this._video.paused) {
-                        this._displacementSprite.x += 0.75 * delta;
-                        this._displacementSprite.y += 0.75;
+                    if (!this._video.paused) {
+                        // stage update operations for animation
+                        this._activeStage.update();
+                        this._pixiFilters.animate(delta);
                     }
+                    // render PIXI stage
                     this._app.renderer.render(this._stage);
                 });
             }
-            applyPixiFilrer() {
-                // Blur filter
-                let blurFilter = new PIXI.filters.BlurFilter(20);
-                blurFilter.blur = 50;
-                blurFilter.quality = 10;
-                // Displacement filter
-                this._displacementSprite = PIXI.Sprite.from(this._displacementImageUrl);
-                this._displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
-                this._stage.addChild(this._displacementSprite);
-                var displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite, 50);
-                // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
-                displacementFilter.autoFit = false;
-                //this._stage.filters = [blurFilter];
-                //this._stage.filters = [displacementFilter];
-            }
+            //protected applyPixiFilrer() {
+            //    // Blur filter
+            //    let blurFilter = new PIXI.filters.BlurFilter(20);
+            //    blurFilter.blur = 50;
+            //    blurFilter.quality = 10;
+            //    // Displacement filter
+            //    this._displacementSprite = PIXI.Sprite.from(this._displacementImageUrl);
+            //    this._displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+            //    this._stage.addChild(this._displacementSprite);
+            //    var displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite, 50);
+            //    // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
+            //    displacementFilter.autoFit = false;
+            //    this._stage.filters = [blurFilter];
+            //    //this._stage.filters = [displacementFilter];
+            //}
             onVideoCanPlay(ev) {
                 console.log("Video can play fired");
                 // create PIXI staff with deffered way
@@ -325,6 +345,16 @@ var app;
                         }
                         li.remove();
                     }
+                }
+            }
+            doFilterApply(ev) {
+                if (!this._app)
+                    return;
+                if (app.util.dom.filterEvent(ev, "ul.filter-list li input[type=checkbox]")) {
+                    const li = app.util.dom.closest(ev.target, "ul.filter-list li");
+                    const checkbox = li.querySelector("input[type=checkbox]");
+                    // set enabled for a filter
+                    this._pixiFilters.enable(checkbox.value, checkbox.checked);
                 }
             }
         }

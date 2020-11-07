@@ -12,6 +12,7 @@ namespace app.media {
         destroy();
     }
 
+
     export class CameraBackground extends CamcorderBase {
 
         protected _app: PIXI.Application;
@@ -19,11 +20,11 @@ namespace app.media {
         protected _ticker: PIXI.Ticker;
 
         protected _pixiStages: { [key: string]: IPixiStage };
+        protected _pixiFilters: app.pixi.PixiFilterManager;
 
         protected _activeStage: IPixiStage;
 
         protected _displacementImageUrl: string;
-        protected _displacementSprite: PIXI.Sprite;
 
         protected _canvasVideoCtx: CanvasRenderingContext2D;
         protected _canvasOverlayCtx: CanvasRenderingContext2D;
@@ -33,6 +34,8 @@ namespace app.media {
 
         protected _backgroundList: HTMLUListElement;
         protected _uploadImage: HTMLInputElement;
+
+        protected _filterList: HTMLUListElement;
 
         protected _animationTimeoutId: number;
 
@@ -50,22 +53,30 @@ namespace app.media {
             this._animationTimeoutId = 0;
 
             this._pixiStages = {};
+            this._pixiFilters = new pixi.PixiFilterManager();
 
             this._canvasCadre = this._element.querySelector('.video-player #cadre'); 
 
             this._backgroundList = this._element.querySelector('.background-list');
             this._uploadImage = this._backgroundList.querySelector('.upload input[type=file]');
 
-            // add video events
+            this._filterList = this._element.querySelector('.filter-list');
+
+            // Video events
             this._video.addEventListener("play", ev => this.onVideoPlay(ev));
 
             this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
 
+            // Background list events
             this._backgroundList.addEventListener("change", ev => { this.doBackgroundApply(ev) });
 
             this._backgroundList.addEventListener("click", ev => { this.doBackgroundCommand(ev) });
 
             this._uploadImage.addEventListener("change", ev => { this.doBackgroundUpload(ev) });
+
+            // Filter list events
+            this._filterList.addEventListener("change", ev => { this.doFilterApply(ev) });
+
         }
 
         protected createPixi() {
@@ -79,11 +90,11 @@ namespace app.media {
             // initialize PIXI stage sprites
             this.initializePixiStages();
 
+            // initialize PIXI filters
+            this.initializePixiFilters();
+
             // resize the player and PIXI's video texture
             this.resizePlayer();
-
-            // TODO: add filters
-            this.applyPixiFilrer();
 
             // start PIXI animation
             this.animatePixi();
@@ -105,6 +116,8 @@ namespace app.media {
             //}
 
             //this._pixiStages = {};
+
+            this._pixiFilters.clear();
 
             ticker.stop();
             ticker.destroy();
@@ -149,50 +162,73 @@ namespace app.media {
             this._activeStage.setVisibility(true);
         }
 
+        protected initializePixiFilters() {
+
+            // Add blur filter
+            this._pixiFilters.addFilter(pixi.PixiFilterNames.BlurFilter, new pixi.PixiBlurFilter(false));
+
+            // Add displacement filter
+            this._pixiFilters.addFilter(pixi.PixiFilterNames.DisplacementFilter,
+                new pixi.PixiDisplacementFilter(this._stage, this._displacementImageUrl, false));
+
+            // Find selected filter option
+            const checkedFilters = this._filterList.querySelectorAll('li input[type=checkbox]:checked');
+
+            const filterNames: string[] = [];
+            checkedFilters.forEach(x => filterNames.push((<HTMLInputElement>x).value));
+
+            // enable filters
+            this._pixiFilters.enableFilters(filterNames, true);
+
+            // set filters to the stage
+            this._stage.filters = this._pixiFilters.getFilters();
+
+        }
+
         protected animatePixi() {
 
             // render the stage
             this._ticker.add((delta) => {
 
-                // stage update operations for animation
-                this._activeStage.update();
+                if (!this._video.paused) {
 
+                    // stage update operations for animation
+                    this._activeStage.update();
 
-                if (this._displacementSprite && !this._video.paused) {
-                        this._displacementSprite.x += 0.75 * delta;
-                        this._displacementSprite.y += 0.75 ;
+                    this._pixiFilters.animate(delta);
                 }
 
+                // render PIXI stage
                 this._app.renderer.render(this._stage);
 
              });
             
         }
 
-        protected applyPixiFilrer() {
+        //protected applyPixiFilrer() {
 
-            // Blur filter
-            let blurFilter = new PIXI.filters.BlurFilter(20);
+        //    // Blur filter
+        //    let blurFilter = new PIXI.filters.BlurFilter(20);
 
-            blurFilter.blur = 50;
-            blurFilter.quality = 10;
+        //    blurFilter.blur = 50;
+        //    blurFilter.quality = 10;
 
 
-            // Displacement filter
-            this._displacementSprite = PIXI.Sprite.from(this._displacementImageUrl);
-            this._displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+        //    // Displacement filter
+        //    this._displacementSprite = PIXI.Sprite.from(this._displacementImageUrl);
+        //    this._displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
 
-            this._stage.addChild(this._displacementSprite);
+        //    this._stage.addChild(this._displacementSprite);
 
-            var displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite, 50);
+        //    var displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite, 50);
 
-            // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
-            displacementFilter.autoFit = false;
+        //    // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
+        //    displacementFilter.autoFit = false;
 
-            //this._stage.filters = [blurFilter];
-            //this._stage.filters = [displacementFilter];
+        //    this._stage.filters = [blurFilter];
+        //    //this._stage.filters = [displacementFilter];
 
-        }
+        //}
 
         protected onVideoCanPlay(ev) {
 
@@ -468,6 +504,21 @@ namespace app.media {
                 }
 
             }
+        }
+
+        protected doFilterApply(ev: Event) {
+
+            if (!this._app) return;
+
+            if (app.util.dom.filterEvent(ev, "ul.filter-list li input[type=checkbox]")) {
+                const li = app.util.dom.closest(<HTMLElement>ev.target, "ul.filter-list li");
+                const checkbox = <HTMLInputElement>li.querySelector("input[type=checkbox]");
+
+                // set enabled for a filter
+                this._pixiFilters.enable(checkbox.value, checkbox.checked);
+
+            }
+
         }
          
     }

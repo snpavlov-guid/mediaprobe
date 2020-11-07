@@ -3,18 +3,19 @@
 -------------------------------------------------- */
 
 .video-preset {
-    margin: 3rem 0;
+    margin: 0 0;
+    margin-top: 3rem;
 }
 
 .video-preset h3 {
     font-size: 1rem;
 }
 
-.background-list {
+.preset-list {
     margin: 20px 0;
 }
 
-ul.background-list {
+ul.preset-list {
     list-style: none;
     margin: 0;
     padding: 0;
@@ -26,7 +27,7 @@ ul.background-list {
     padding: 10px 0;
 }
 
-ul.background-list li.bk-broadsheet {
+ul.preset-list li.preset-item {
     overflow: hidden;
     min-width: 160px;
     width: 160px;
@@ -35,10 +36,10 @@ ul.background-list li.bk-broadsheet {
     margin: 4pt 4pt;
 }
 
-.bk-broadsheet label,
-.bk-broadsheet .content,
-.bk-broadsheet .tick-frame,
-.bk-broadsheet .ctrl-frame {
+.preset-item label,
+.preset-item .content,
+.preset-item .tick-frame,
+.preset-item .ctrl-frame {
     position: absolute;
     top: 0;
     left: 0;
@@ -46,25 +47,25 @@ ul.background-list li.bk-broadsheet {
     height: 100%;
 }
 
-.bk-broadsheet .content {
+.preset-item .content {
     background-color: lightgray;
 }
 
-.bk-broadsheet img.content {
+.preset-item img.content {
     object-fit: cover;
     transition: transform ease-out 300ms;
 }
 
-.bk-broadsheet:hover img.content {
+.preset-item:hover img.content {
     transform: scale(1.2);
 }
 
-.bk-broadsheet img.content {
+.preset-item img.content {
     object-fit: cover;
     transition: transform ease-out 300ms;
 }
 
-.bk-broadsheet span.content:before {
+.preset-item span.content:before {
     content: attr(data-name);
     position: absolute;
     top: 50%;
@@ -77,20 +78,43 @@ ul.background-list li.bk-broadsheet {
     white-space: nowrap;
 }
 
-.bk-broadsheet .tick-frame {
+.preset-item .preset-info {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: #efefef;
+    font-size: x-small;
+    font-weight: bold;
+    padding: 2pt 3pt;
+    background-color: rgba(48, 48, 48, 0.5);
+    /*transform: translateY(100%);*/
+    transform: scaleY(0);
+    transform-origin: bottom center;
+    transition: transform ease-out 200ms;
+}
+
+.preset-item:hover .preset-info {
+    /*transform: translateY(0);*/
+    transform: scaleY(1);
+}
+
+.preset-item .tick-frame {
     border: solid 2px transparent;
 }
 
-.bk-broadsheet input[type="radio"]:checked ~ .tick-frame {
+.preset-item input[type="radio"]:checked ~ .tick-frame,
+.preset-item input[type="checkbox"]:checked ~ .tick-frame {
     border-color: var(--indigo);
 }
 
-.bk-broadsheet input[type="radio"]:checked ~ .tick-frame::after {
+.preset-item input[type="radio"]:checked ~ .tick-frame::after,
+.preset-item input[type="checkbox"]:checked ~ .tick-frame::after{
     content: "\2713";
     border-color: var(--indigo);
 }
 
-.bk-broadsheet .tick-frame::after {
+.preset-item .tick-frame::after {
     content: "";
     position: absolute;
     top: 4%;
@@ -106,12 +130,12 @@ ul.background-list li.bk-broadsheet {
     padding-left: 3px;
 }
 
-.bk-broadsheet .tick-frame:hover::after {
+.preset-item .tick-frame:hover::after {
     border-color: var(--gray-dark);
     background-color: lightgray;
 }
 
-.bk-broadsheet .ctrl-frame {
+.preset-item .ctrl-frame {
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
@@ -120,12 +144,12 @@ ul.background-list li.bk-broadsheet {
     padding: 4%;
 }
 
-.bk-broadsheet .ctrl-frame:hover {
+.preset-item .ctrl-frame:hover {
      opacity: 1;
 }
 
 
-.bk-broadsheet .ctrl-frame button {
+.preset-item .ctrl-frame button {
     position: relative;
     width: 20px;
     height: 20px;
@@ -135,11 +159,11 @@ ul.background-list li.bk-broadsheet {
     outline: none;
 }
 
-.bk-broadsheet .ctrl-frame button:hover {
+.preset-item .ctrl-frame button:hover {
     background-color: #efefef;
 }
 
-.bk-broadsheet .ctrl-frame button:after {
+.preset-item .ctrl-frame button:after {
     content: "";
     position: absolute;
     top: 0;
@@ -149,7 +173,7 @@ ul.background-list li.bk-broadsheet {
     margin: 3px 3px;
 }
 
-.bk-broadsheet .ctrl-frame button.item-remove:after {
+.preset-item .ctrl-frame button.item-remove:after {
     content: "";
     background-image: url(/img/feather-x.svg);
     background-repeat: no-repeat;
@@ -157,7 +181,7 @@ ul.background-list li.bk-broadsheet {
 }
 
 
-.bk-broadsheet .content .upload {
+.preset-item .content .upload {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -184,8 +208,10 @@ ul.background-list li.bk-broadsheet {
 }
 
 
+
+
 @media (max-width: 1200px) {
-    ul .background-list li.bk-broadsheet {
+    ul .preset-list li.preset-item {
         min-width: 160px;
         width: 160px;
         height: 120px;
@@ -194,7 +220,7 @@ ul.background-list li.bk-broadsheet {
 
 @media (max-width: 992px) {
 
-    ul.background-list li.bk-broadsheet {
+    ul.preset-list li.preset-item {
         min-width: 140px;
         width: 140px;
         height: 100px;
@@ -203,13 +229,13 @@ ul.background-list li.bk-broadsheet {
 
 @media (max-width: 768px) {
 
-    ul.background-list li.bk-broadsheet {
+    ul.preset-list li.preset-item {
         min-width: 120px;
         width: 120px;
         height: 80px;
     }
 
-    .bk-broadsheet .tick-frame::after {
+    .preset-item .tick-frame::after {
         width: 16px;
         height: 16px;
         font-size: 14px;
@@ -217,7 +243,7 @@ ul.background-list li.bk-broadsheet {
         padding-left: 2px;
     }
 
-    .bk-broadsheet .ctrl-frame button {
+    .preset-item .ctrl-frame button {
         width: 16px;
         height: 16px;
     }
@@ -225,6 +251,10 @@ ul.background-list li.bk-broadsheet {
 
 @media (max-width: 576px) {
 
- 
+    .preset-item .preset-info {
+        color: #efefef;
+        font-size: xx-small;
+        white-space: nowrap;
+    }
 }
 
