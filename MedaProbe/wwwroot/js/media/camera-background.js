@@ -26,9 +26,14 @@ var app;
                     this._pixiStages = {};
                     this._pixiFilters = new app_1.pixi.PixiFilterManager();
                     this._canvasCadre = this._element.querySelector('.video-player #cadre');
+                    this._detectOptions = this._controls.querySelector('.detect-quality > select');
                     this._backgroundList = this._element.querySelector('.background-list');
                     this._uploadImage = this._backgroundList.querySelector('.upload input[type=file]');
                     this._filterList = this._element.querySelector('.filter-list');
+                    // Body-pix detection options
+                    this.setupDetectSelectionOptions();
+                    // Option events
+                    this._detectOptions.addEventListener("change", () => { this.changeDetectOption(); });
                     // Video events
                     this._video.addEventListener("play", ev => this.onVideoPlay(ev));
                     this._video.addEventListener("canplay", ev => this.onVideoCanPlay(ev));
@@ -39,6 +44,14 @@ var app;
                     // Filter list events
                     this._filterList.addEventListener("change", ev => { this.doFilterApply(ev); });
                 });
+            }
+            setupDetectSelectionOptions() {
+                var detectOptions = [];
+                CameraBackground.detectQuality.forEach((el, i) => {
+                    detectOptions.push(`<option value="${el.value}">${el.title}</option>`);
+                });
+                this._detectOptions.innerHTML = detectOptions.join('');
+                this._detectOptions.selectedIndex = 1;
             }
             createPixi() {
                 // check if app created
@@ -193,6 +206,12 @@ var app;
                     yield _super.changeRatioSelection.call(this);
                 });
             }
+            changeDetectOption() {
+                if (this._streamDetect) {
+                    this.stopDetection();
+                    this.startDetection();
+                }
+            }
             startDetection() {
                 return __awaiter(this, void 0, void 0, function* () {
                     //// load body-pix detector class
@@ -201,6 +220,8 @@ var app;
                     //}
                     // load body-pix detector worker
                     yield this.loadDetectorWorker();
+                    // set currently selected resolution option
+                    yield this.setDetectOptionsWorker({ internalResolution: this._detectOptions.value });
                     // Get overlay canvas
                     this._canvasOverlayCtx = this._overlayVideo.getContext("2d");
                     this._canvasCadreCtx = this._canvasCadre.getContext("2d");
@@ -370,6 +391,12 @@ var app;
                 }
             }
         }
+        CameraBackground.detectQuality = [
+            { title: "Low", value: "low" },
+            { title: "Medium", value: "medium" },
+            { title: "High", value: "high" },
+            { title: "Full", value: "full" }
+        ];
         media.CameraBackground = CameraBackground;
         class PixiVideoStage {
             constructor(stage, video, visibility = true) {

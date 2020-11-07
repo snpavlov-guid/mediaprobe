@@ -22,15 +22,31 @@
 
     ctx.postMessage({});
 
+    const detectOptions = {
+        flipHorizontal: false,
+        internalResolution: 'low',
+        segmentationThreshold: 0.7
+    };
+
     ctx.onmessage = async (ev) => {
 
-        const segmentation = await net.segmentPerson(ev.data, {
-            flipHorizontal: false,
-            internalResolution: 'low',
-            segmentationThreshold: 0.7
-        });
+        if (ev.data.command == "detect") {
 
-        ctx.postMessage(segmentation)
+            const segmentation = await net.segmentPerson(ev.data.image, detectOptions);
+
+            ctx.postMessage(segmentation)
+        }
+
+        if (ev.data.command == "options") {
+
+            detectOptions.flipHorizontal = ev.data.options.flipHorizontal || detectOptions.flipHorizontal;
+            detectOptions.internalResolution = ev.data.options.internalResolution || detectOptions.internalResolution;
+            detectOptions.segmentationThreshold = ev.data.options.segmentationThreshold || detectOptions.segmentationThreshold;
+
+            console.log(`${workerName}: options are ${JSON.stringify(detectOptions)}`);
+
+            ctx.postMessage({});
+        }
 
     }
 })()

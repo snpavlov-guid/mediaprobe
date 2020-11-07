@@ -320,10 +320,21 @@ var app;
             detectImageWorker(imgData) {
                 return __awaiter(this, void 0, void 0, function* () {
                     // post image to detection
-                    this._detector.postMessage(imgData);
+                    this._detector.postMessage({ command: "detect", image: imgData });
                     return yield new Promise((resolve, reject) => {
                         this._detector.onmessage = (ev) => {
                             resolve(ev.data);
+                        };
+                    });
+                });
+            }
+            setDetectOptionsWorker(options) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    // post image to detection
+                    this._detector.postMessage({ command: "options", options: options });
+                    return yield new Promise((resolve, reject) => {
+                        this._detector.onmessage = (ev) => {
+                            resolve(true);
                         };
                     });
                 });

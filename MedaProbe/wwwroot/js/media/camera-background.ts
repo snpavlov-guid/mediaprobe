@@ -32,6 +32,8 @@ namespace app.media {
         protected _canvasCadre: HTMLCanvasElement;
         protected _canvasCadreCtx: CanvasRenderingContext2D;
 
+        protected _detectOptions: HTMLSelectElement;
+
         protected _backgroundList: HTMLUListElement;
         protected _uploadImage: HTMLInputElement;
 
@@ -40,6 +42,12 @@ namespace app.media {
         protected _animationTimeoutId: number;
 
         protected _bodyPix: BodyPix.IBodyPix;
+
+        public static readonly detectQuality = [
+            { title: "Low", value: "low" },
+            { title: "Medium", value: "medium" },
+            { title: "High", value: "high" },
+            { title: "Full", value: "full" }];
 
         constructor(element: Element, options: ICameraBackgroundOptions) {
             super(element, options);
@@ -57,10 +65,19 @@ namespace app.media {
 
             this._canvasCadre = this._element.querySelector('.video-player #cadre'); 
 
+            this._detectOptions = this._controls.querySelector('.detect-quality > select');
+
             this._backgroundList = this._element.querySelector('.background-list');
             this._uploadImage = this._backgroundList.querySelector('.upload input[type=file]');
 
             this._filterList = this._element.querySelector('.filter-list');
+
+            // Body-pix detection options
+            this.setupDetectSelectionOptions();
+
+
+            // Option events
+            this._detectOptions.addEventListener("change", () => { this.changeDetectOption(); });
 
             // Video events
             this._video.addEventListener("play", ev => this.onVideoPlay(ev));
@@ -77,6 +94,15 @@ namespace app.media {
             // Filter list events
             this._filterList.addEventListener("change", ev => { this.doFilterApply(ev) });
 
+        }
+
+        protected setupDetectSelectionOptions() {
+            var detectOptions: string[] = [];
+            CameraBackground.detectQuality.forEach((el, i) => {
+                detectOptions.push(`<option value="${el.value}">${el.title}</option>`);
+            });
+            this._detectOptions.innerHTML = detectOptions.join('');
+            this._detectOptions.selectedIndex = 1;
         }
 
         protected createPixi() {
@@ -311,6 +337,17 @@ namespace app.media {
 
         }
 
+        protected changeDetectOption() {
+
+            if (this._streamDetect) {
+
+                this.stopDetection();
+
+                this.startDetection();
+            }
+
+        }
+
         protected async startDetection() {
 
             //// load body-pix detector class
@@ -320,6 +357,9 @@ namespace app.media {
 
             // load body-pix detector worker
             await this.loadDetectorWorker();
+
+            // set currently selected resolution option
+            await this.setDetectOptionsWorker({ internalResolution: this._detectOptions.value });
 
             // Get overlay canvas
             this._canvasOverlayCtx = this._overlayVideo.getContext("2d"); 

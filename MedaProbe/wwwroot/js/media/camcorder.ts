@@ -468,7 +468,7 @@ namespace app.media {
         protected async detectImageWorker<TRES>(imgData: ImageData): Promise<TRES> {
 
             // post image to detection
-            this._detector.postMessage(imgData);
+            this._detector.postMessage({ command: "detect",  image: imgData });
 
             return await new Promise<TRES>((resolve, reject) => {
                 this._detector.onmessage = (ev: MessageEvent) => {
@@ -479,6 +479,19 @@ namespace app.media {
 
         }
 
+        protected async setDetectOptionsWorker(options: any): Promise<boolean> {
+
+            // post image to detection
+            this._detector.postMessage({ command: "options", options: options });
+
+            return await new Promise<boolean>((resolve, reject) => {
+                this._detector.onmessage = (ev: MessageEvent) => {
+                    resolve(true);
+                }
+
+            });
+
+        }
   
     }
 

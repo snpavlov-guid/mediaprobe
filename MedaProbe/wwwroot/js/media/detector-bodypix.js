@@ -22,13 +22,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     const net = yield bodyPix.load();
     console.log(`${workerName}: model loaded`);
     ctx.postMessage({});
+    const detectOptions = {
+        flipHorizontal: false,
+        internalResolution: 'low',
+        segmentationThreshold: 0.7
+    };
     ctx.onmessage = (ev) => __awaiter(this, void 0, void 0, function* () {
-        const segmentation = yield net.segmentPerson(ev.data, {
-            flipHorizontal: false,
-            internalResolution: 'low',
-            segmentationThreshold: 0.7
-        });
-        ctx.postMessage(segmentation);
+        if (ev.data.command == "detect") {
+            const segmentation = yield net.segmentPerson(ev.data.image, detectOptions);
+            ctx.postMessage(segmentation);
+        }
+        if (ev.data.command == "options") {
+            detectOptions.flipHorizontal = ev.data.options.flipHorizontal || detectOptions.flipHorizontal;
+            detectOptions.internalResolution = ev.data.options.internalResolution || detectOptions.internalResolution;
+            detectOptions.segmentationThreshold = ev.data.options.segmentationThreshold || detectOptions.segmentationThreshold;
+            console.log(`${workerName}: options are ${JSON.stringify(detectOptions)}`);
+            ctx.postMessage({});
+        }
     });
 }))();
 //# sourceMappingURL=detector-bodypix.js.map
