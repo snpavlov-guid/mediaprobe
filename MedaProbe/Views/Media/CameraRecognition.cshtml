@@ -19,14 +19,18 @@
     <script src="~/js/media/camera.js"></script>
 }
 
+@section viewmenu {
+    <partial name="Forms/_CamcoderMenu">
+}
+
 <div class="container">
 
     <section id="camera-party">
 
         <div id="player" class="video-player">
-            
+
             <div class="startup-text">&#9733; it shows camera here &#9733;</div>
-            
+
             <canvas id="capture"></canvas>
             <video id="video" autoplay></video>
             <canvas id="overlay"></canvas>
@@ -100,7 +104,7 @@
         var cameraParty = new app.media.CameraParty(document.getElementById("camera-party"),
             {
                 detectorWorkerScriptUrl: "@Url.Content("~/js/media/detector.js")",
-                debugLog : true
+                debugLog : false
             });
 
 });
