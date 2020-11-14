@@ -39,6 +39,9 @@ namespace app.media {
 
         protected _filterList: HTMLUListElement;
 
+        protected _screenshotList: HTMLUListElement;
+        protected _snapshotImage: HTMLButtonElement;
+
         protected _animationTimeoutId: number;
 
         protected _bodyPix: BodyPix.IBodyPix;
@@ -72,6 +75,10 @@ namespace app.media {
 
             this._filterList = this._element.querySelector('.filter-list');
 
+            this._screenshotList = this._element.querySelector('.snapshot-list');
+            this._snapshotImage = this._screenshotList.querySelector('.snapshot button');
+
+
             // Body-pix detection options
             this.setupDetectSelectionOptions();
 
@@ -93,6 +100,11 @@ namespace app.media {
 
             // Filter list events
             this._filterList.addEventListener("change", ev => { this.doFilterApply(ev) });
+
+            // Snapshot list events
+            this._screenshotList.addEventListener("click", ev => { this.doScreenshotCommand(ev) });
+
+            this._snapshotImage.addEventListener("click", ev => { this.doScreenshot() });
 
         }
 
@@ -582,7 +594,61 @@ namespace app.media {
             }
 
         }
-         
+
+        protected async doScreenshot() {
+            if (!this._streamStarted) return;
+
+            const maxItems: number = this._maxScreenshots;
+
+            let dataUrl = await this.createImageDataUrl();
+
+            const listLen = this._screenshotList.children.length;
+
+            if (listLen - 1 == maxItems) {
+                this._screenshotList.children[listLen-2].remove();
+            }
+
+            this._screenshotList.prepend(this.createScreenshotElement(dataUrl, new Date()));
+        };
+
+        protected async createImageDataUrl() {
+            // Source canvas
+            let sourceCanvas = this._overlayVideo;
+
+            if (!this._streamDetect && this._app) {
+                sourceCanvas = this._app.renderer.plugins.extract.canvas(this._stage);
+            };
+
+            return sourceCanvas.toDataURL('image/jpg');
+        }
+
+        protected doScreenshotCommand(ev: MouseEvent) {
+
+            const prefix: string = "screenshot";
+
+            if (app.util.dom.filterEvent(ev, "ul.snapshot-list li button.item-download")) {
+                const li = app.util.dom.closest(<HTMLElement>ev.target, "ul.snapshot-list li");
+                const img = li ? li.querySelector("img.content") : null;
+                if (img) {
+                    const info = li.querySelector(".preset-info");
+                    const date = new Date(info.getAttribute("data-datetime"));
+                    const name = `${prefix} [${app.util.dom.toFileNamedDateFormat(date)}]`;
+
+                    this.downloadScreenshot(<HTMLImageElement>img, name);
+                }
+            }
+
+            if (app.util.dom.filterEvent(ev, "ul.snapshot-list li button.item-remove")) {
+                const li = app.util.dom.closest(<HTMLElement>ev.target, "ul.snapshot-list li");
+
+                if (li && confirm("You are about to remove snapshot?")) {
+                    li.remove();
+                }
+
+            }
+
+        }
+
     }
 
 

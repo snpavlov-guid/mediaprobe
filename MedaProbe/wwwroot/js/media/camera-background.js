@@ -30,6 +30,8 @@ var app;
                     this._backgroundList = this._element.querySelector('.background-list');
                     this._uploadImage = this._backgroundList.querySelector('.upload input[type=file]');
                     this._filterList = this._element.querySelector('.filter-list');
+                    this._screenshotList = this._element.querySelector('.snapshot-list');
+                    this._snapshotImage = this._screenshotList.querySelector('.snapshot button');
                     // Body-pix detection options
                     this.setupDetectSelectionOptions();
                     // Option events
@@ -43,6 +45,9 @@ var app;
                     this._uploadImage.addEventListener("change", ev => { this.doBackgroundUpload(ev); });
                     // Filter list events
                     this._filterList.addEventListener("change", ev => { this.doFilterApply(ev); });
+                    // Snapshot list events
+                    this._screenshotList.addEventListener("click", ev => { this.doScreenshotCommand(ev); });
+                    this._snapshotImage.addEventListener("click", ev => { this.doScreenshot(); });
                 });
             }
             setupDetectSelectionOptions() {
@@ -388,6 +393,50 @@ var app;
                     const checkbox = li.querySelector("input[type=checkbox]");
                     // set enabled for a filter
                     this._pixiFilters.enable(checkbox.value, checkbox.checked);
+                }
+            }
+            doScreenshot() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    if (!this._streamStarted)
+                        return;
+                    const maxItems = this._maxScreenshots;
+                    let dataUrl = yield this.createImageDataUrl();
+                    const listLen = this._screenshotList.children.length;
+                    if (listLen - 1 == maxItems) {
+                        this._screenshotList.children[listLen - 2].remove();
+                    }
+                    this._screenshotList.prepend(this.createScreenshotElement(dataUrl, new Date()));
+                });
+            }
+            ;
+            createImageDataUrl() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    // Source canvas
+                    let sourceCanvas = this._overlayVideo;
+                    if (!this._streamDetect && this._app) {
+                        sourceCanvas = this._app.renderer.plugins.extract.canvas(this._stage);
+                    }
+                    ;
+                    return sourceCanvas.toDataURL('image/jpg');
+                });
+            }
+            doScreenshotCommand(ev) {
+                const prefix = "screenshot";
+                if (app.util.dom.filterEvent(ev, "ul.snapshot-list li button.item-download")) {
+                    const li = app.util.dom.closest(ev.target, "ul.snapshot-list li");
+                    const img = li ? li.querySelector("img.content") : null;
+                    if (img) {
+                        const info = li.querySelector(".preset-info");
+                        const date = new Date(info.getAttribute("data-datetime"));
+                        const name = `${prefix} [${app.util.dom.toFileNamedDateFormat(date)}]`;
+                        this.downloadScreenshot(img, name);
+                    }
+                }
+                if (app.util.dom.filterEvent(ev, "ul.snapshot-list li button.item-remove")) {
+                    const li = app.util.dom.closest(ev.target, "ul.snapshot-list li");
+                    if (li && confirm("You are about to remove snapshot?")) {
+                        li.remove();
+                    }
                 }
             }
         }

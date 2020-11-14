@@ -180,8 +180,16 @@ ul.preset-list li.preset-item {
     background-size: cover;
 }
 
+.preset-item .ctrl-frame button.item-download:after {
+    content: "";
+    background-image: url(/img/feather-download.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}
 
-.preset-item .content .upload {
+
+.preset-item .content .upload,
+.preset-item .content .snapshot {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -193,7 +201,8 @@ ul.preset-list li.preset-item {
     display: none;
 }
 
-.upload button {
+.upload button,
+.snapshot button {
     color: rgba(0, 0, 0, 0.3);
     border: solid 1px #adb5bd;
     font-family: 'Lato', sans-serif;
@@ -203,11 +212,15 @@ ul.preset-list li.preset-item {
     background-image: linear-gradient(to right bottom, var(--light), lightgray);
 }
 
-.upload button:hover {
+.upload button:hover,
+.snapshot button:hover
+{
     color: rgba(0, 0, 0, 0.5);
 }
 
-
+.snapshot-list .preset-item .ctrl-frame {
+    justify-content: space-between;
+}
 
 
 @media (max-width: 1200px) {

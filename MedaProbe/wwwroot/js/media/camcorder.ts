@@ -119,6 +119,7 @@ namespace app.media {
             this._btnPlay.onclick = () => { this.startStream(); };
             this._btnPause.onclick = () => { this.pauseStream(); };
             this._btnDetect.onclick = () => { this.doDetect(); }
+            this._btnScreenshot.onclick = () => { this.doScreenshot(); }
 
             this._player.addEventListener("mousemove", ev => { this.animControlsPanel() });
 
@@ -490,6 +491,47 @@ namespace app.media {
                 }
 
             });
+
+        }
+
+        protected async doScreenshot() {
+           
+        };
+
+        protected getScreenshotItemTemplate(): Node {
+            let template = <HTMLTemplateElement>document.querySelector("template#screenshot-item");
+            return template.content.cloneNode(true);
+        }
+
+        protected createScreenshotElement(dataUrl: string, time: Date): HTMLLIElement {
+            const li = <HTMLLIElement>this.getScreenshotItemTemplate();
+
+            const img = <HTMLImageElement>li.querySelector("img.content");
+            img.src = dataUrl;
+
+            const dtdata = time.toISOString();
+            const options: Intl.DateTimeFormatOptions = {
+                year: "numeric", month: "numeric", day: "numeric",
+                hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+            };
+            const dttext = new Intl.DateTimeFormat("en", options).format(time);
+
+            const info = <HTMLDivElement>li.querySelector(".preset-info");
+            info.setAttribute("data-datetime", dtdata);
+            info.innerHTML = `${dttext}`;
+
+            return li;
+        }
+
+        protected downloadScreenshot(img: HTMLImageElement, downloadName: string) {
+
+            var link = document.createElement("a");
+            link.download = downloadName;
+            link.href = img.src;
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
         }
   

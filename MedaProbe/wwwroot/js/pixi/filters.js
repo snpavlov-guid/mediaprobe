@@ -98,7 +98,7 @@ var app;
                 this._displacementFilter = new PIXI.filters.DisplacementFilter(this._displacementSprite, 50);
                 this._displacementFilter.enabled = enabled;
                 // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
-                this._displacementFilter.autoFit = false;
+                this._displacementFilter.autoFit = true;
                 this._animationOffset = new PIXI.Point(0.75, 0.75);
             }
             get pixiFilter() {

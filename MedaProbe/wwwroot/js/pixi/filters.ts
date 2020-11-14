@@ -139,7 +139,7 @@ namespace app.pixi {
             this._displacementFilter.enabled = enabled;
 
             // PIXI tries to fit the filter bounding box to the renderer so we optionally bypass
-            this._displacementFilter.autoFit = false;
+            this._displacementFilter.autoFit = true;
 
             this._animationOffset = new PIXI.Point(0.75, 0.75);
 

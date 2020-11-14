@@ -42,6 +42,7 @@ var app;
                     this._btnPlay.onclick = () => { this.startStream(); };
                     this._btnPause.onclick = () => { this.pauseStream(); };
                     this._btnDetect.onclick = () => { this.doDetect(); };
+                    this._btnScreenshot.onclick = () => { this.doScreenshot(); };
                     this._player.addEventListener("mousemove", ev => { this.animControlsPanel(); });
                     window.addEventListener("resize", ev => { this.resizePlayer(); });
                     console.log("Camera player created");
@@ -338,6 +339,38 @@ var app;
                         };
                     });
                 });
+            }
+            doScreenshot() {
+                return __awaiter(this, void 0, void 0, function* () {
+                });
+            }
+            ;
+            getScreenshotItemTemplate() {
+                let template = document.querySelector("template#screenshot-item");
+                return template.content.cloneNode(true);
+            }
+            createScreenshotElement(dataUrl, time) {
+                const li = this.getScreenshotItemTemplate();
+                const img = li.querySelector("img.content");
+                img.src = dataUrl;
+                const dtdata = time.toISOString();
+                const options = {
+                    year: "numeric", month: "numeric", day: "numeric",
+                    hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+                };
+                const dttext = new Intl.DateTimeFormat("en", options).format(time);
+                const info = li.querySelector(".preset-info");
+                info.setAttribute("data-datetime", dtdata);
+                info.innerHTML = `${dttext}`;
+                return li;
+            }
+            downloadScreenshot(img, downloadName) {
+                var link = document.createElement("a");
+                link.download = downloadName;
+                link.href = img.src;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
         }
         CamcorderBase.requiredMediaFeatures = ['mediaDevices', 'getUserMedia'];
