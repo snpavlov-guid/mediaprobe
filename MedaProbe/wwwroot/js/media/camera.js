@@ -25,7 +25,7 @@ var app;
             setupComponent() {
                 return __awaiter(this, void 0, void 0, function* () {
                     this._player = this._element.querySelector('#player');
-                    this._canvasVideo = this._element.querySelector('#player #cupture');
+                    this._canvasVideo = this._element.querySelector('#player #capture');
                     this._video = this._element.querySelector('#player #video');
                     this._overlayCanvas = this._element.querySelector('#player #overlay');
                     this._cameraOptions = this._element.querySelector('.video-options > select');

@@ -15,7 +15,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "Effect/goldstar",
+      "launchUrl": "Media/CameraBackground",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

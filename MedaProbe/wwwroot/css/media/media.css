@@ -18,9 +18,10 @@ section#camera-party {
 }
 
 
-.video-player #cupture,
+.video-player #capture,
 .video-player #video,
-.video-player #overlay
+.video-player #overlay,
+.video-player #cadre
 {
     position:absolute;
     left: 0;
@@ -109,6 +110,7 @@ section#camera-party {
 }
 
 .buttons > button {
+    position: relative;
     width: 45px;
     height: 45px;
     text-align: center;
@@ -136,11 +138,15 @@ section#camera-party {
 }
 
 .buttons > button > svg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     height: 20px;
     width: 18px;
     text-align: center;
     margin: 0 auto;
     padding: 0;
+    transform: translate(-50%, -50%);
 }
 
 .buttons > button:nth-child(1) {

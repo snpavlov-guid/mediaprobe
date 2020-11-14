@@ -17,5 +17,11 @@ namespace CoreProbe1.Controllers
         {
             return View();
         }
+
+        public IActionResult CameraBackground()
+        {
+            return View();
+        }
+
     }
 }

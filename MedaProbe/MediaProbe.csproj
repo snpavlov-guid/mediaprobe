@@ -8,12 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\media\camcorder.ts" />
+    <Content Remove="wwwroot\js\media\camera-background.ts" />
     <Content Remove="wwwroot\js\media\camera.ts" />
     <Content Remove="wwwroot\js\media\declarations.ts" />
+    <Content Remove="wwwroot\js\media\detector-bodypix.ts" />
     <Content Remove="wwwroot\js\media\detector.ts" />
+    <Content Remove="wwwroot\js\pixi\filters.ts" />
     <Content Remove="wwwroot\js\slider\liquid-methods.ts" />
     <Content Remove="wwwroot\js\slider\liquid-slider.ts" />
+    <Content Remove="wwwroot\js\typings\body-pix-declarations.d.ts" />
     <Content Remove="wwwroot\js\typings\gsap-proxy.d.ts" />
+    <Content Remove="wwwroot\js\typings\pixi-filters.d.ts" />
     <Content Remove="wwwroot\js\typings\pixi.js.d.ts" />
     <Content Remove="wwwroot\js\utils\util-checker.ts" />
     <Content Remove="wwwroot\js\utils\util-data.ts" />
@@ -28,26 +34,32 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
   </ItemGroup>
 
 
   <ItemGroup>
     <Folder Include="Areas\" />
-    <Folder Include="wwwroot\img\" />
     <Folder Include="wwwroot\img\liquids\" />
+    <Folder Include="wwwroot\img\camera\" />
     <Folder Include="wwwroot\lib\pixi\" />
     <Folder Include="wwwroot\media\" />
   </ItemGroup>
 
 
   <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\js\media\detector-bodypix.ts" />
+    <TypeScriptCompile Include="wwwroot\js\media\camcorder.ts" />
+    <TypeScriptCompile Include="wwwroot\js\media\camera-background.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\camera.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\declarations.ts" />
     <TypeScriptCompile Include="wwwroot\js\media\detector.ts" />
+    <TypeScriptCompile Include="wwwroot\js\pixi\filters.ts" />
     <TypeScriptCompile Include="wwwroot\js\slider\liquid-methods.ts" />
     <TypeScriptCompile Include="wwwroot\js\slider\liquid-slider.ts" />
+    <TypeScriptCompile Include="wwwroot\js\typings\body-pix-declarations.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\gsap-proxy.d.ts" />
+    <TypeScriptCompile Include="wwwroot\js\typings\pixi-filters.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\pixi.js.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-checker.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-data.ts" />

@@ -1,5 +1,4 @@
-﻿
-@{
+﻿@{
     Layout = "_ViewLayout";
 
     ViewData["Title"] = "Camera Recognition";
@@ -9,38 +8,61 @@
     <link rel="stylesheet" href="~/css/common/general.css" />
     <link rel="stylesheet" href="~/css/common/loading.css" />
     <link rel="stylesheet" href="~/css/media/media.css" />
+    <link rel="stylesheet" href="~/css/media/presets.css" />
+
+    <!-- Load TensorFlow.js -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/@@tensorflow/tfjs@1.2"></script>-->
+    <!-- Load BodyPix -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/@@tensorflow-models/body-pix@2.0"></script>-->
+
 }
 
 @section scripts {
     <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.2.4/pixi.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pixi-filters@latest/dist/pixi-filters.js"></script>
+
     <script src="~/js/utils/util-dom.js"></script>
     <script src="~/js/utils/util-image.js"></script>
     <script src="~/js/utils/util-checker.js"></script>
-    <script src="~/js/media/camera.js"></script>
+
+    <script src="~/js/pixi/filters.js"></script>
+
+    <script src="~/js/media/camcorder.js"></script>
+    <script src="~/js/media/camera-background.js"></script>
+
 }
+
 
 <div class="container">
 
     <section id="camera-party">
 
         <div id="player" class="video-player">
-            
+
             <div class="startup-text">&#9733; it shows camera here &#9733;</div>
-            
+
+            <canvas id="cadre" class="d-none"></canvas>
             <canvas id="capture"></canvas>
-            <video id="video" autoplay></video>
+            <video id="video" autoplay class="d-none"></video>
             <canvas id="overlay"></canvas>
 
             <div class="controls">
                 <div class="options">
                     <div class="video-options">
-                        <select name="" id="" class="custom-select">
+                        <select name="" id="" class="custom-select" title="Select camera">
                             <option value="">Select camera</option>
                         </select>
                     </div>
                     <div class="video-ratio">
-                        <select name="" id="" class="custom-select">
+                        <select name="" id="" class="custom-select" title="Select screen ratio">
                             <option value="">Select ratio</option>
+                        </select>
+                    </div>
+                    <div class="detect-quality">
+                        <select name="" id="" class="custom-select" title="Select detection quality">
+                            <option value="">Select detect resolution</option>
                         </select>
                     </div>
                 </div>
@@ -54,30 +76,35 @@
 
         </div>
 
-        <div class="video-detect d-none">
-            <canvas id="source-canvas"></canvas>
+        <div class="video-preset">
+            <h3>Backgrounds</h3>
+            <partial name="Forms/_BackgroundList" />
         </div>
 
-        <div class="video-screenshot">
-            <ul class="screenshot-list"></ul>
+        <div class="video-preset">
+            <h3>Effects</h3>
+            <partial name="Forms/_FilterList" />
+        </div>
+
+        <div class="video-preset">
+            <h3>Snapshots</h3>
+            <partial name="Forms/_ScreenshotList" />
         </div>
 
     </section>
 
     <section id="templates">
 
-        <template id="screenshot-item">
-            <img id="screenshot" />
-            <div class="screenshot-ctrl">
-                <button class="screenshot-download" title="Download"></button>
-                <button class="screenshot-remove" title="Remove"></button>
-            </div>
-            <div class="screenshot-info">
-            </div>
-        </template>
-
         <template id="loading-indicator">
             <partial name="common/_loading" />
+        </template>
+
+        <template id="background-item">
+            <partial name="forms/_BackgroundItem" />
+        </template>
+
+        <template id="screenshot-item">
+            <partial name="forms/_ScreenshotItem" />
         </template>
 
         <template id="not-supported">
@@ -88,6 +115,7 @@
 
 </div>
 
+
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", async () => {
@@ -97,12 +125,13 @@
         const checker = new app.util.check.Checker();
         if (!checker.showNotSupportedObjects(["ImageCapture"], "#templates #not-supported", "section.main")) return;
 
-        var cameraParty = new app.media.CameraParty(document.getElementById("camera-party"),
+        var camera = new app.media.CameraBackground(document.getElementById("camera-party"),
             {
-                detectorWorkerScriptUrl: "@Url.Content("~/js/media/detector.js")",
-                debugLog : true
+                debugLog: true,
+                detectorWorkerScriptUrl: "@(Url.Content("~/js/media/detector-bodypix.js") + "?_=" + DateTime.Now.Millisecond))",
+                displacementImage: "@Url.Content("~/img/liquids/dmaps/512x512/clouds.jpg")",
             });
 
-});
+    });
 
 </script>
