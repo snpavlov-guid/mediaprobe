@@ -14,10 +14,15 @@
     <script src="~/js/utils/util-checker.js"></script>
 }
 
+@section viewmenu {
+    <partial name="Forms/_VideoEffectMenu">
+}
+
+
 <div class="effect">
 
     <video autoplay muted loop crossorigin="anonymous"
-           src="~/media/y2mate.com - ФК Зенит _ FC Zenit_Z95FaXRhKik_1080p.mp4">
+           src="~/media/y2mate.com - «Мы Чемпионы!», «Зенит» – чемпион России по футболу в сезоне 20192020._1080pFHR.mp4">
     </video>
 
     <div class="shade"></div>
@@ -47,8 +52,8 @@
         const bannerAnimClass = "banner-view-animation";
         const bannerEndAnim = "anim-banner-hide";
 
-        var effect = document.querySelector(".effect"); 
-        var banner = document.querySelector(".banner"); 
+        var effect = document.querySelector(".effect");
+        var banner = document.querySelector(".banner");
 
         var btn = document.getElementById("play");
         var player = document.getElementById("player");
@@ -90,4 +95,3 @@
    var main = document.querySelector("section.main");
         var topnav = document.querySelector(".top-nav");
 
- 
