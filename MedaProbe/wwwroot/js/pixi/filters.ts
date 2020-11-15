@@ -87,6 +87,7 @@ namespace app.pixi {
             this._blurFilter.enabled = enabled;
             this._blurFilter.blur = 50;
             this._blurFilter.quality = 10;
+            this._blurFilter.autoFit = true;
         }
 
         get pixiFilter(): PIXI.Filter {
@@ -180,6 +181,7 @@ namespace app.pixi {
         protected init(enabled: boolean) {
             this._motionBlurFilter = new PIXI.filters.MotionBlurFilter(new PIXI.Point(50, -50), 21, 0);
             this._motionBlurFilter.enabled = enabled;
+            this._motionBlurFilter.autoFit = true;
         }
 
 
@@ -215,6 +217,7 @@ namespace app.pixi {
         protected init(enabled: boolean) {
             this._kawaseBlurFilter = new PIXI.filters.KawaseBlurFilter(10, 10);
             this._kawaseBlurFilter.enabled = enabled;
+            this._kawaseBlurFilter.autoFit = true;
         }
 
 
@@ -270,6 +273,7 @@ namespace app.pixi {
                 this._shockwaveOptions, 0);
 
             this._shockwaveFilter.enabled = enabled;
+            this._shockwaveFilter.autoFit = true;
         }
 
         get pixiFilter(): PIXI.Filter {
@@ -309,6 +313,7 @@ namespace app.pixi {
             this._bulgePinchFilter = new PIXI.filters.BulgePinchFilter();
             this._bulgePinchFilter.enabled = enabled;
             this._bulgePinchFilter.strength = 0.75;
+            this._bulgePinchFilter.autoFit = true;
         }
 
         get pixiFilter(): PIXI.Filter {
@@ -332,6 +337,5 @@ namespace app.pixi {
         }
     }
 
-    //BulgePinchFilter
 
 }
