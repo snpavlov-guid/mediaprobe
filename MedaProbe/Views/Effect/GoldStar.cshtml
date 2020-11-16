@@ -12,6 +12,8 @@
 @section scripts {
     <script src="~/js/utils/util-dom.js"></script>
     <script src="~/js/utils/util-checker.js"></script>
+
+    <script src="~/js/utils/util-test.js"></script>
 }
 
 <div class="shape">
@@ -27,4 +29,14 @@
         <feDisplacementMap in2="SourceMap" scale="30"></feDisplacementMap>
     </filter>
 </svg>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        app.util.test.testFuncMethod();
+
+    });
+
+</script>
 
