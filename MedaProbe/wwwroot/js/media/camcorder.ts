@@ -147,7 +147,8 @@ namespace app.media {
                     resolve(await this._navigator.mediaDevices.getUserMedia(givenConstraints));
 
                 }
-                catch  (e) {
+                catch (e) {
+                    console.error(`${e.name}, ${e.message}`);
                     reject(e);
                 }
          
@@ -176,6 +177,8 @@ namespace app.media {
         }
 
         protected async startMediaStream() {
+
+            if (!this._cameraOptions.value) return;
 
             var stream = await this.getUserMediaStream(this._cameraOptions.value, this.getVideoConstrains());
 
