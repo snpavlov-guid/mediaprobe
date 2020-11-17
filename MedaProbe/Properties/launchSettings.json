@@ -15,7 +15,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "Effect/goldStar",
+      "launchUrl": "Effect/VideoZenit",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

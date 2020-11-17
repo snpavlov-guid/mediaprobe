@@ -60,6 +60,7 @@ var app;
                             resolve(yield this._navigator.mediaDevices.getUserMedia(givenConstraints));
                         }
                         catch (e) {
+                            console.error(`${e.name}, ${e.message}`);
                             reject(e);
                         }
                     }));
@@ -85,6 +86,8 @@ var app;
             }
             startMediaStream() {
                 return __awaiter(this, void 0, void 0, function* () {
+                    if (!this._cameraOptions.value)
+                        return;
                     var stream = yield this.getUserMediaStream(this._cameraOptions.value, this.getVideoConstrains());
                     if (stream) {
                         this._video.srcObject = stream;

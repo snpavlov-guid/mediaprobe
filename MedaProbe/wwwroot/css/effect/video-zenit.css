@@ -6,9 +6,9 @@ body {
     padding: 0;
 }
 
-header {
+/*header {
     display:none;
-}
+}*/
 
 section.main {
     box-sizing: border-box;
@@ -149,6 +149,7 @@ div.effect .audio-box {
 
 div.effect .audio-box > div {
     text-align: right;
+    z-index: 222;
 }
 
 div.effect .audio-box button {
