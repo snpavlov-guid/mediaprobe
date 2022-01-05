@@ -12,8 +12,11 @@
     "@tensorflow-models/body-pix": "^2.0.5",
     "@tensorflow-models/coco-ssd": "^2.0.3",
     "@types/gsap": "^1.20.2",
+    "@types/three": "^0.136.1",
     "@types/w3c-image-capture": "^1.0.2",
+    "@types/webrtc": "^0.0.31",
     "pixi-filters": "^3.1.1",
-    "pixi.js": "^5.2.4"
+    "pixi.js": "^5.2.4",
+    "three-orbitcontrols-ts": "^0.1.2"
   }
 }

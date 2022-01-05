@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <UserSecretsId>aspnet-CoreProbe1-1802C0EA-1586-4F89-82DF-DCE7A9D44F56</UserSecretsId>
     <AssemblyName>MediaProbe</AssemblyName>
-    <TypeScriptToolsVersion>3.8</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>4.4</TypeScriptToolsVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +17,7 @@
     <Content Remove="wwwroot\js\pixi\filters.ts" />
     <Content Remove="wwwroot\js\slider\liquid-methods.ts" />
     <Content Remove="wwwroot\js\slider\liquid-slider.ts" />
+    <Content Remove="wwwroot\js\three\music-visualizer.ts" />
     <Content Remove="wwwroot\js\typings\body-pix-declarations.d.ts" />
     <Content Remove="wwwroot\js\typings\gsap-proxy.d.ts" />
     <Content Remove="wwwroot\js\typings\pixi-filters.d.ts" />
@@ -58,6 +59,7 @@
     <TypeScriptCompile Include="wwwroot\js\pixi\filters.ts" />
     <TypeScriptCompile Include="wwwroot\js\slider\liquid-methods.ts" />
     <TypeScriptCompile Include="wwwroot\js\slider\liquid-slider.ts" />
+    <TypeScriptCompile Include="wwwroot\js\three\music-visualizer.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\body-pix-declarations.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\gsap-proxy.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\pixi-filters.d.ts" />

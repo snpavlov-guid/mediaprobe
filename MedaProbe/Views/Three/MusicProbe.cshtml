@@ -1,0 +1,48 @@
+﻿
+@{
+    Layout = "_ViewLayout";
+
+    ViewData["Title"] = "Music Probe";
+}
+
+@section head {
+    <link rel="stylesheet" href="~/css/common/general.css" />
+    <link rel="stylesheet" href="~/css/three/music-probe.css" />
+}
+
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://unpkg.com/three@0.85.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js" integrity="sha512-LF8ZB1iTwi4Qvkm4pekHG4a437Y9Af5ZuwbnW4GTbAWQeR2E4KW8WF+xH8b9psevV7wIlDMx1MH9YfPqgKhA/Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.js"></script>
+
+    <script src="~/js/three/music-visualizer.js"></script>
+
+}
+
+
+@section viewmenu {
+
+}
+
+
+<div class="container">
+    <section id="visualizer">
+    </section>
+</div>
+
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", async () => {
+
+         var visualizer = new app.three.MusicVisualizer(document.getElementById("visualizer"),
+            {
+            });
+
+         visualizer.displayProbe();
+
+    });
+
+</script>

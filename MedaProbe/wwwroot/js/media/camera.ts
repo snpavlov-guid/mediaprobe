@@ -135,7 +135,7 @@ namespace app.media {
             await new Promise((resolve, reject) => {
                 this._detector.onmessage = (_) => {
                     console.log("Detector worker loaded");
-                    resolve()
+                    resolve(null)
                 }
             })
 
