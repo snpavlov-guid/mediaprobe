@@ -19,12 +19,18 @@ namespace app.media {
         protected _initialized: boolean;
         protected _scene: THREE.Scene;
         protected _camera: THREE.PerspectiveCamera;
+        protected _group: THREE.Group;
         protected _renderer: THREE.Renderer;
 
         protected _ball: THREE.Mesh;
+        protected _basePlane1: THREE.Mesh;
+        protected _basePlane2: THREE.Mesh;
+        protected _plane1: THREE.Mesh;
+        protected _plane2: THREE.Mesh;
 
         protected _analyzer: AnalyserNode;
         protected _soundDataArray: Uint8Array;
+        protected _timeoutId: number;
 
 
         constructor(element: Element, options: IVisualizerOptions) {
@@ -65,7 +71,12 @@ namespace app.media {
             this._audio.load();
 
             this._fileItem.classList.remove("d-none");
+
             this._btnPlay.classList.remove('d-none');
+            this._btnPause.classList.add('d-none');
+            this._btnScreenshot.classList.add('d-none');
+
+            this.clearScene();
 
         }
 
@@ -80,6 +91,9 @@ namespace app.media {
             this._btnScreenshot.classList.add('d-none');
 
             this._fileItem.classList.add("d-none");
+
+            this.clearScene();
+
         }
 
         protected startPlaying() {
@@ -98,6 +112,9 @@ namespace app.media {
             if (this._audio && this._audio.src) {
                 this._audio.play()
                 this.setControlState(true)
+
+                // add group into scene
+                this._scene.add(this._group);
 
                 // Start render scene
                 this.startSceneRendering();
@@ -154,6 +171,8 @@ namespace app.media {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(45, this._canvasVideo.width / this._canvasVideo.height, 0.1, 1000);
 
+            scene.background = new THREE.Color(0x252d91);
+
             camera.position.set(0, 0, 100);
             camera.lookAt(scene.position);
             scene.add(camera);
@@ -163,7 +182,8 @@ namespace app.media {
 
             const group = new THREE.Group();
 
-            const planeGeom = new THREE.PlaneGeometry(800, 800, 20, 20);
+            const planeBase = new THREE.PlaneGeometry(500, 500, 40, 40);
+            const planeGeom = new THREE.PlaneGeometry(500, 500, 40, 40);
             const planeMater = new THREE.MeshLambertMaterial({
                 color: 0x6904ce,
                 side: THREE.DoubleSide,
@@ -171,11 +191,21 @@ namespace app.media {
 
             });
 
+            // add first base plane
+            const baseplane1 = new THREE.Mesh(planeBase, planeMater);
+            baseplane1.rotation.x = -0.5 * Math.PI;
+            baseplane1.position.set(0, 30, 0);
+ 
             // add first plane
             const plane1 = new THREE.Mesh(planeGeom, planeMater);
             plane1.rotation.x = -0.5 * Math.PI;
             plane1.position.set(0, 30, 0);
             group.add(plane1);
+
+            // add second base plane
+            const baseplane2 = new THREE.Mesh(planeBase, planeMater);
+            baseplane2.rotation.x = -0.5 * Math.PI;
+            baseplane2.position.set(0, -30, 0);
 
             // add second plane
             const plane2 = new THREE.Mesh(planeGeom, planeMater);
@@ -202,18 +232,21 @@ namespace app.media {
             const spotLight = new THREE.SpotLight(0xffffff);
             spotLight.intensity = 0.9;
             spotLight.position.set(-10, 20, 40);
-            //spotLight.lookAt(null);
+            spotLight.lookAt(ball.position);
             spotLight.castShadow = true;
             scene.add(spotLight);
-
-            scene.add(group);
 
             // save instance members
             this._scene = scene;
             this._camera = camera;
+            this._group = group;
             this._renderer = renderer;
 
             this._ball = ball;
+            this._basePlane1 = baseplane1;
+            this._basePlane2 = baseplane2;
+            this._plane1 = plane1;
+            this._plane2 = plane2;
 
             this._initialized = true;
              
@@ -223,13 +256,16 @@ namespace app.media {
             const self = this;
 
             function renderScene() {
-                requestAnimationFrame(renderScene);
 
-                //self.makeRoughBall(self._ball, 0, 0);
+                if (self._audio.paused) return;
 
                 self.makeSceneDistortions();
 
+                self._ball.rotation.y += 0.0005;
+
                 self._renderer.render(self._scene, self._camera);
+
+                requestAnimationFrame(renderScene);
             };
 
             renderScene();
@@ -246,6 +282,11 @@ namespace app.media {
                 this._renderer.setSize(this._canvasVideo.width, this._canvasVideo.height);
             }
 
+        }
+
+        protected clearScene() {
+            this._scene.remove(this._group);
+            this._renderer.render(this._scene, this._camera);
         }
 
         protected makeSceneDistortions() {
@@ -269,6 +310,22 @@ namespace app.media {
             /* use the reduced values to modulate the 3d objects */
             // these are the planar meshes above and below the sphere
 
+            if (!this._timeoutId) {
+                this._timeoutId = setTimeout(() => {
+                    this.makeRoughGround(this._plane1, this._basePlane1, this.modulate(upperAvgFr, 0, 1, 0.5, 4));
+                    this.makeRoughGround(this._plane2, this._basePlane2, this.modulate(lowerAvgFr, 0, 1, 0.5, 4));
+
+                    this._timeoutId = 0;
+                }, 50);
+            }
+
+            // this modulates the sphere's shape.
+            this.makeRoughBall(
+                this._ball,
+                this.modulate(Math.pow(lowerMaxFr, 0.5), 0, 1, 0, 8),
+                this.modulate(upperAvgFr, 0, 1, 0, 4)
+            );
+
         }
 
         protected makeRoughBall(mesh: THREE.Mesh, bassFr: number, treFr : number) {
@@ -276,11 +333,13 @@ namespace app.media {
 
             const offset = ballGeom.parameters.radius;
             const time = window.performance.now();
-            const amp = 7;
+            const amp = 0.7;
 
             const positions = mesh.geometry.attributes["position"].array;
             const count = positions.length / 3;
 
+            const meshPositions = new Float32Array(positions.length); // 3 vertices per point
+ 
             for (let i = 0; i < count; i++) {
                 let vert = new THREE.Vector3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
 
@@ -292,40 +351,63 @@ namespace app.media {
                 ) * amp * treFr;
                 vert.multiplyScalar(distance);
 
-                //positions[i * 3] = vert.x;
+                meshPositions[i * 3] = vert.x;
+                meshPositions[i * 3 + 1] = vert.y;
+                meshPositions[i * 3 + 2] = vert.z;
 
             }
 
-            //mesh.geometry.setAttribute("position", new THREE.BufferAttribute())
+            mesh.geometry.setAttribute('position', new THREE.BufferAttribute(meshPositions, 3));
 
-            //this._simplexNoise.noise3D()
+            mesh.geometry.attributes.position.needsUpdate = true;
 
-            //const vec = new THREE.Vector3(0, 0, 0);
+            mesh.geometry.computeBoundingBox();
+            mesh.geometry.computeBoundingSphere();
+            mesh.geometry.computeVertexNormals();
 
-            //vec.multiplyScalar(40);
+        }
 
-            //geometry.com
+        protected makeRoughGround(mesh: THREE.Mesh, baseMesh: THREE.Mesh, rgFr: number) {
+            const planeGeom = <THREE.PlaneGeometry>mesh.geometry;
 
-            //mesh.geometry.vertices.forEach(function (vertex, i) {
+            const time = window.performance.now();
+            const amp = 0.7;
 
-            //    var offset = mesh.geometry.parameters.radius;
-            //    var time = window.performance.now();
-            //    vertex.normalize();
-            //    var distance = (offset + bassFr) + noise.noise3D(
-            //        vertex.x + time * 0.00007,
-            //        vertex.y + time * 0.00008,
-            //        vertex.z + time * 0.00009
-            //    ) * amp * treFr;
-            //    vertex.multiplyScalar(distance);
-            //});
+            
 
-            //mesh.geometry.verticesNeedUpdate = true;
-            //mesh.geometry.normalsNeedUpdate = true;
-            //mesh.geometry.computeVertexNormals();
-            //mesh.geometry.computeFaceNormals();
+            const positions = baseMesh.geometry.attributes["position"].array;
+            const count = positions.length / 3;
 
-            //geometry.
+            const meshPositions = new Float32Array(positions.length); // 3 vertices per point
 
+            for (let i = 0; i < count; i++) {
+                let vert = new THREE.Vector3(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+
+               if (Math.round(Math.random()) > 0) {
+                    const distance = this._simplexNoise.noise3D(
+                        time * 0.00007,
+                        time * 0.00008,
+                        time * 0.00009
+                    ) * amp * rgFr;
+
+                   vert.x += distance * Math.random();
+                   vert.y += distance * Math.random();
+                   vert.z += distance;
+                }
+
+                meshPositions[i * 3] = vert.x;
+                meshPositions[i * 3 + 1] = vert.y;
+                meshPositions[i * 3 + 2] = vert.z;
+
+            }
+
+            mesh.geometry.setAttribute('position', new THREE.BufferAttribute(meshPositions, 3));
+
+            mesh.geometry.attributes.position.needsUpdate = true;
+
+            mesh.geometry.computeBoundingBox();
+            mesh.geometry.computeBoundingSphere();
+            mesh.geometry.computeVertexNormals();
 
         }
 
