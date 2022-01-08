@@ -95,7 +95,7 @@ namespace app.media {
             this.resizePlayer();
         }
 
-        protected async setupComponent() {
+        protected setupComponent() {
             this._player = this._element.querySelector('.video-player');
             this._controls = this._element.querySelector('.video-player .controls');
             this._cameraOptions = this._controls.querySelector('.video-options > select');
@@ -113,8 +113,10 @@ namespace app.media {
 
             this.setControlState(false);
 
-            this._cameraOptions.onchange = () => { this.changeCameraSelection(); };
-            this._ratioOptions.onchange = () => { this.changeRatioSelection(); };
+            if (this._cameraOptions)
+                this._cameraOptions.onchange = () => { this.changeCameraSelection(); };
+            if (this._ratioOptions)
+                this._ratioOptions.onchange = () => { this.changeRatioSelection(); };
 
             this._btnPlay.onclick = () => { this.startStream(); };
             this._btnPause.onclick = () => { this.pauseStream(); };
@@ -215,6 +217,7 @@ namespace app.media {
         }
 
         protected async setupCameraSelectionOptions() {
+            if (!this._cameraOptions) return;
             let cameraOptions = await this.getCameraSelectionOptions(this.getVideoConstrains());
             this._cameraOptions.innerHTML = cameraOptions.join('');
         }

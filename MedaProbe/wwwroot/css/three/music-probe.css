@@ -19,3 +19,82 @@ section.main {
     align-content: center;
     background-color: aliceblue;
 }
+
+.video-ratio {
+    display: flex;
+    align-items: center;
+}
+
+.music-file {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.music-file > * {
+    margin-right: 10px;
+}
+
+.music-file label {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.music-file button.btn {
+    color: rgba(0, 0, 0, 0.7);
+    border: solid 1px #adb5bd;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1px;
+    background-image: linear-gradient(to right bottom, var(--light), lightgray);
+    box-shadow: none;
+}
+
+.music-file button.btn:hover {
+    color: rgba(0, 0, 0, 0.9);
+}
+
+.music-file button.btn:focus {
+    box-shadow: none;
+}
+
+.music-file .file-item {
+    display: flex;
+    align-items: center;
+}
+
+.music-file .file-item > * {
+    margin-right: 5px;
+}
+
+.file-item button.inline-btn {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    outline: none;
+}
+
+.file-item button.inline-btn:hover {
+    background-color: #efefef;
+}
+
+.file-item button.inline-btn:after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: 3px 3px;
+}
+
+.file-item button.item-remove:after {
+    content: "";
+    background-image: url(/img/feather-x.svg);
+    background-repeat: no-repeat;
+    background-size: cover;
+}

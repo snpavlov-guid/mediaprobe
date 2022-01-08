@@ -22,6 +22,8 @@
     <Content Remove="wwwroot\js\typings\gsap-proxy.d.ts" />
     <Content Remove="wwwroot\js\typings\pixi-filters.d.ts" />
     <Content Remove="wwwroot\js\typings\pixi.js.d.ts" />
+    <Content Remove="wwwroot\js\typings\simplex-noise-proxy.d.ts" />
+    <Content Remove="wwwroot\js\typings\window.d.ts" />
     <Content Remove="wwwroot\js\utils\util-checker.ts" />
     <Content Remove="wwwroot\js\utils\util-data.ts" />
     <Content Remove="wwwroot\js\utils\util-dom.ts" />
@@ -36,7 +38,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.2" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.4" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
   </ItemGroup>
 
 
@@ -44,6 +46,7 @@
     <Folder Include="Areas\" />
     <Folder Include="wwwroot\img\liquids\" />
     <Folder Include="wwwroot\img\camera\" />
+    <Folder Include="wwwroot\lib\simplex-noise\" />
     <Folder Include="wwwroot\lib\pixi\" />
     <Folder Include="wwwroot\media\" />
   </ItemGroup>
@@ -64,6 +67,8 @@
     <TypeScriptCompile Include="wwwroot\js\typings\gsap-proxy.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\pixi-filters.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\typings\pixi.js.d.ts" />
+    <TypeScriptCompile Include="wwwroot\js\typings\simplex-noise-proxy.d.ts" />
+    <TypeScriptCompile Include="wwwroot\js\typings\window.d.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-checker.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-data.ts" />
     <TypeScriptCompile Include="wwwroot\js\utils\util-dom.ts" />

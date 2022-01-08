@@ -24,29 +24,29 @@ var app;
                 this.resizePlayer();
             }
             setupComponent() {
-                return __awaiter(this, void 0, void 0, function* () {
-                    this._player = this._element.querySelector('.video-player');
-                    this._controls = this._element.querySelector('.video-player .controls');
-                    this._cameraOptions = this._controls.querySelector('.video-options > select');
-                    this._ratioOptions = this._controls.querySelector('.video-ratio > select');
-                    this._video = this._element.querySelector('.video-player #video');
-                    this._canvasVideo = this._element.querySelector('.video-player #capture');
-                    this._overlayVideo = this._element.querySelector('.video-player #overlay');
-                    this.resizePlayer();
-                    this.setupCameraSelectionOptions();
-                    this.setupRatioSelectionOptions();
-                    this.setupPlayerButtons();
-                    this.setControlState(false);
+                this._player = this._element.querySelector('.video-player');
+                this._controls = this._element.querySelector('.video-player .controls');
+                this._cameraOptions = this._controls.querySelector('.video-options > select');
+                this._ratioOptions = this._controls.querySelector('.video-ratio > select');
+                this._video = this._element.querySelector('.video-player #video');
+                this._canvasVideo = this._element.querySelector('.video-player #capture');
+                this._overlayVideo = this._element.querySelector('.video-player #overlay');
+                this.resizePlayer();
+                this.setupCameraSelectionOptions();
+                this.setupRatioSelectionOptions();
+                this.setupPlayerButtons();
+                this.setControlState(false);
+                if (this._cameraOptions)
                     this._cameraOptions.onchange = () => { this.changeCameraSelection(); };
+                if (this._ratioOptions)
                     this._ratioOptions.onchange = () => { this.changeRatioSelection(); };
-                    this._btnPlay.onclick = () => { this.startStream(); };
-                    this._btnPause.onclick = () => { this.pauseStream(); };
-                    this._btnDetect.onclick = () => { this.doDetect(); };
-                    this._btnScreenshot.onclick = () => { this.doScreenshot(); };
-                    this._player.addEventListener("mousemove", ev => { this.animControlsPanel(); });
-                    window.addEventListener("resize", ev => { this.resizePlayer(); });
-                    console.log("Camera player created");
-                });
+                this._btnPlay.onclick = () => { this.startStream(); };
+                this._btnPause.onclick = () => { this.pauseStream(); };
+                this._btnDetect.onclick = () => { this.doDetect(); };
+                this._btnScreenshot.onclick = () => { this.doScreenshot(); };
+                this._player.addEventListener("mousemove", ev => { this.animControlsPanel(); });
+                window.addEventListener("resize", ev => { this.resizePlayer(); });
+                console.log("Camera player created");
             }
             getUserMediaStream(deviceId, constrains) {
                 return __awaiter(this, void 0, void 0, function* () {
@@ -121,6 +121,8 @@ var app;
             }
             setupCameraSelectionOptions() {
                 return __awaiter(this, void 0, void 0, function* () {
+                    if (!this._cameraOptions)
+                        return;
                     let cameraOptions = yield this.getCameraSelectionOptions(this.getVideoConstrains());
                     this._cameraOptions.innerHTML = cameraOptions.join('');
                 });

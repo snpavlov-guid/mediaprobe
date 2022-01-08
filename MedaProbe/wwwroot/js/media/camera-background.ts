@@ -106,6 +106,9 @@ namespace app.media {
 
             this._snapshotImage.addEventListener("click", ev => { this.doScreenshot() });
 
+
+            console.log("CameraBackground.setupComponent");
+
         }
 
         protected setupDetectSelectionOptions() {

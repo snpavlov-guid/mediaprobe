@@ -48,6 +48,7 @@ var app;
                     // Snapshot list events
                     this._screenshotList.addEventListener("click", ev => { this.doScreenshotCommand(ev); });
                     this._snapshotImage.addEventListener("click", ev => { this.doScreenshot(); });
+                    console.log("CameraBackground.setupComponent");
                 });
             }
             setupDetectSelectionOptions() {

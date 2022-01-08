@@ -52,7 +52,7 @@ section#camera-party {
     align-content:center;
     padding: 5px 10px;
     background-color: rgba(52, 58, 64, 0.3);
-    transform: translateY(-100%);
+/*    transform: translateY(-100%);*/
 }
 
 .video-player:hover .controls:hover {
@@ -61,9 +61,9 @@ section#camera-party {
     animation-play-state:paused;
 }
 
-.video-player .controls.controls-view-animation {
+/*.video-player .controls.controls-view-animation {
     animation: anim-controls-show ease-out 200ms 0ms, anim-controls-hold linear 5s 200ms, anim-controls-hide ease-out 1.5s 5200ms;
-}
+}*/
 
 @keyframes anim-controls-show {
     to {
