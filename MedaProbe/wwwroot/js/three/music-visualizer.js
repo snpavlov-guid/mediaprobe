@@ -13,10 +13,15 @@ var app;
                 this._file = this._element.querySelector(".music-file input[type=file]");
                 this._audio = this._element.querySelector(".music-file audio");
                 this._closeFile = this._element.querySelector(".music-file button.item-remove");
+                this._currentTime = this._element.querySelector(".music-file .file-item .audio-player-container #current-time");
+                this._totalTime = this._element.querySelector(".music-file .file-item .audio-player-container #duration");
+                this._audioRange = this._element.querySelector(".music-file .file-item .audio-player-container #seek-slider");
+                this._muteButton = this._element.querySelector(".music-file .file-item .audio-player-container #mute");
                 this._btnPlay.onclick = () => { this.startPlaying(); };
                 this._btnPause.onclick = () => { this.pausePlaying(); };
                 this._file.addEventListener("change", ev => { this.changeMusicFile(ev); });
                 this._closeFile.addEventListener("click", ev => { this.closeMusicFile(); });
+                this.setupAudioPlayer();
                 this._btnPlay.classList.add('d-none');
                 console.log("MusicVisualizer.setupComponent");
             }
@@ -274,6 +279,41 @@ var app;
                 const fr = this.fractionate(value, minval, maxval);
                 const dx = maxout - minout;
                 return minout + (fr * dx);
+            }
+            setupAudioPlayer() {
+                this._volume = this._audio.volume;
+                this._audioRange.addEventListener('change', () => {
+                    this._audio.currentTime = parseFloat(this._audioRange.value);
+                });
+                this._audioRange.addEventListener('input', () => {
+                    this._audio.currentTime = parseFloat(this._audioRange.value);
+                });
+                this._audio.addEventListener('timeupdate', () => {
+                    this._audioRange.value = this._audio.currentTime.toString();
+                    this._currentTime.textContent = this.getDurationText(this._audio.currentTime);
+                });
+                this._audio.addEventListener('loadedmetadata', () => {
+                    this._totalTime.textContent = this.getDurationText(this._audio.duration);
+                    this._audioRange.max = Math.floor(this._audio.duration).toString();
+                });
+                this._muteButton.addEventListener('click', () => {
+                    if (this._muteButton.classList.contains("on")) {
+                        this._muteButton.classList.remove("on");
+                        this._muteButton.classList.add("off");
+                        this._audio.volume = 0;
+                    }
+                    else {
+                        this._muteButton.classList.remove("off");
+                        this._muteButton.classList.add("on");
+                        this._audio.volume = this._volume;
+                    }
+                });
+            }
+            getDurationText(secs) {
+                const minutes = Math.floor(secs / 60);
+                const seconds = Math.floor(secs % 60);
+                const returnedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
+                return `${minutes}:${returnedSeconds}`;
             }
             displayProbe() {
                 const scene = new THREE.Scene();

@@ -15,6 +15,11 @@ namespace app.media {
         protected _audio: HTMLAudioElement;
         protected _closeFile: HTMLButtonElement;
 
+        protected _currentTime: HTMLSpanElement;
+        protected _totalTime: HTMLSpanElement;
+        protected _audioRange: HTMLInputElement;
+        protected _muteButton: HTMLButtonElement;
+        protected _volume: number;
 
         protected _initialized: boolean;
         protected _scene: THREE.Scene;
@@ -47,11 +52,18 @@ namespace app.media {
             this._audio = this._element.querySelector(".music-file audio");
             this._closeFile = this._element.querySelector(".music-file button.item-remove");
 
+            this._currentTime = this._element.querySelector(".music-file .file-item .audio-player-container #current-time");
+            this._totalTime = this._element.querySelector(".music-file .file-item .audio-player-container #duration");
+            this._audioRange = this._element.querySelector(".music-file .file-item .audio-player-container #seek-slider");
+            this._muteButton = this._element.querySelector(".music-file .file-item .audio-player-container #mute");
+
             this._btnPlay.onclick = () => { this.startPlaying() };
             this._btnPause.onclick = () => { this.pausePlaying(); };
 
             this._file.addEventListener("change", ev => { this.changeMusicFile(ev) });
             this._closeFile.addEventListener("click", ev => { this.closeMusicFile() });
+
+            this.setupAudioPlayer();
 
             this._btnPlay.classList.add('d-none');
 
@@ -429,6 +441,52 @@ namespace app.media {
             const dx = maxout - minout;
             return minout + (fr * dx);
         }
+
+        protected setupAudioPlayer() {
+
+            this._volume = this._audio.volume;
+
+            this._audioRange.addEventListener('change', () => {
+                this._audio.currentTime = parseFloat(this._audioRange.value);
+            });
+
+            this._audioRange.addEventListener('input', () => {
+                this._audio.currentTime = parseFloat(this._audioRange.value);   
+            });
+
+            this._audio.addEventListener('timeupdate', () => {
+                this._audioRange.value = this._audio.currentTime.toString();
+                this._currentTime.textContent = this.getDurationText(this._audio.currentTime);
+            });
+
+            this._audio.addEventListener('loadedmetadata', () => {
+                this._totalTime.textContent = this.getDurationText(this._audio.duration);
+                this._audioRange.max = Math.floor(this._audio.duration).toString();
+            });
+
+            this._muteButton.addEventListener('click', () => {
+                if (this._muteButton.classList.contains("on")) {
+                    this._muteButton.classList.remove("on");
+                    this._muteButton.classList.add("off");
+
+                    this._audio.volume = 0;
+                } else {
+                    this._muteButton.classList.remove("off");
+                    this._muteButton.classList.add("on");
+
+                    this._audio.volume = this._volume;
+                }
+            });
+
+        }
+
+        protected getDurationText(secs : number) {
+            const minutes = Math.floor(secs / 60);
+            const seconds = Math.floor(secs % 60);
+            const returnedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
+            return `${minutes}:${returnedSeconds}`;
+        }
+
 
 
         public displayProbe() {
